@@ -16,7 +16,7 @@ Dart 3.13.2 and exits clean.** Open a file, select all, paste into
 | `08_async.dart` | Part 6 · Async | `quote-q1`, countdown 3→0, `~505 ms` |
 | `09_mixins_extensions.dart` | Part 6 · Mixins and extensions | `[QuoteService] quoting…`, `R 1450.00` |
 | `10_lab_1_2_STARTER.dart` | LAB 1.2 | the target output they are aiming for |
-| `11_lab_1_2_SOLUTION.dart` | LAB 1.2 | the seven documented lines |
+| `11_lab_1_2_SOLUTION.dart` | LAB 1.2 | published after the lab |
 | `12_lab_1_3_COMPLETE.dart` | LAB 1.3 | quote, states, `3 parallel quotes in ~1500 ms` |
 
 ---
