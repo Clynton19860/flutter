@@ -140,7 +140,8 @@ flutter doctor
 flutter doctor -v          # verbose: shows the paths it is using
 ```
 
-You need green ticks for **Flutter**, **Android toolchain** and **one IDE**. These warnings are fine and can be ignored today:
+You need green ticks for **Flutter** and **Android toolchain**. Current Flutter no longer reports an IDE in `flutter doctor`, so do not go looking for one. These warnings are fine and can be ignored today:
+
 
 - `[!] Visual Studio`: only needed for Windows desktop apps
 - `[!] Chrome`: only needed for web
