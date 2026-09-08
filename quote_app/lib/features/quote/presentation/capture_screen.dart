@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
+import 'package:quote_app/features/quote/presentation/capture_form.dart';
 
 class CaptureScreen extends StatelessWidget {
   const CaptureScreen({super.key});
 
   static const _wideBreakpoint = 700.0;
+
+  void _showPremium(BuildContext context, QuoteRequest r) {
+    final premium = calculatePremium(r);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Premium ${premium.rands}')),
+    );
+  }
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -12,6 +20,9 @@ class CaptureScreen extends StatelessWidget {
         body: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {
+              final form = CaptureForm(
+                onSubmit: (r) => _showPremium(context, r),
+              );
               if (constraints.maxWidth >= _wideBreakpoint) {
                 return Padding(
                   padding: const EdgeInsets.all(16),
@@ -21,9 +32,7 @@ class CaptureScreen extends StatelessWidget {
                       const SizedBox(width: 280, child: _BrandHeader()),
                       const SizedBox(width: 24),
                       Expanded(
-                        child: SingleChildScrollView(
-                          child: _QuoteFormPlaceholder(),
-                        ),
+                        child: SingleChildScrollView(child: form),
                       ),
                     ],
                   ),
@@ -31,28 +40,16 @@ class CaptureScreen extends StatelessWidget {
               }
               return SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
-                child: const Column(
+                child: Column(
                   children: [
-                    _BrandHeader(),
-                    SizedBox(height: 32),
-                    _QuoteFormPlaceholder(),
+                    const _BrandHeader(),
+                    const SizedBox(height: 32),
+                    form,
                   ],
                 ),
               );
             },
           ),
-        ),
-      );
-}
-
-class _QuoteFormPlaceholder extends StatelessWidget {
-  const _QuoteFormPlaceholder();
-
-  @override
-  Widget build(BuildContext context) => const Card(
-        child: Padding(
-          padding: EdgeInsets.all(24),
-          child: Center(child: Text('Quote form goes here')),
         ),
       );
 }
