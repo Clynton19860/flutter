@@ -818,11 +818,13 @@ Tap the segments, tap Calculate, watch the premium change.
 
 ### 8. Try the Extract Widget refactor
 
-Put your cursor on the `Text(...)` inside `PremiumBadge`, press `Ctrl+.` (`Cmd+.`), and look at the refactor menu: **Wrap with Padding / Center / Column**, **Extract Widget**. You will use this constantly.
+Put your cursor on the `Text(...)` inside `PremiumBadge`, press `⌥+Enter`, and look at the refactor menu: **Wrap with Padding / Center / Column**, **Extract Widget**. You will use this constantly.
 
 ### 9. Open the Widget Inspector
 
-`Ctrl+Shift+P` → **Flutter: Open DevTools** → Widget Inspector → turn on **Select Widget Mode** → tap the premium text on the emulator. It jumps to your source line.
+With your app running on the emulator/device, go to View → Tool Windows → Flutter Inspector (or find the "Flutter Inspector" tab, usually docked on the right or bottom).
+In that panel's toolbar, click the Toggle Select Widget Mode button (looks like a target/cursor select icon).
+Tap the premium text on the emulator — it highlights the widget tree and jumps you to the matching source line, same as the DevTools version.
 
 ```powershell
 flutter analyze          # must be clean
@@ -831,7 +833,7 @@ git add .
 git commit -m "Day 1: skeleton"
 ```
 
-**Stretch**
+**Stretch** TODO MISH
 1. Make Calculate async: `await FakeQuoteService().getQuote(...)` with a `CircularProgressIndicator` while it runs. Add `if (!mounted) return;` after the await.
 2. `flutter pub add intl`, then format with `NumberFormat.currency(locale: 'en_ZA', symbol: 'R ').format(premium)`.
 3. Add a second screen and `Navigator.push` to it, a preview of Day 4.

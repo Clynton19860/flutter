@@ -149,42 +149,42 @@ Stream<QuoteState> quoteStates(QuoteService s, QuoteRequest r) async* {
     yield QuoteFailed(e.toString());
   }
 }
-void main() async {
-  // Lab 1
-  // DONE: build three requests with copyWith, print each premium
-  // DONE: print describe() for all four states
-  const base = QuoteRequest(
-      make: 'VW', year: 2020, driverAge: 30, cover: Cover.comprehensive);
-  final young = base.copyWith(driverAge: 22);
-  final old = base.copyWith(year: 2012, cover: Cover.thirdParty);
-  for (final r in [base, young, old])
-    print('${r.make} ${r.year} → ${calculatePremium(r).rands}');
-  for (final s in [
-    const QuoteIdle(),
-    const QuoteLoading(),
-    QuoteLoaded(Quote(id: 'q1', premium: calculatePremium(base))),
-    const QuoteFailed('too old')
-  ]) {
-    print(describe(s));
-
-    // Lab 2
-    final svc = FakeQuoteService();
-    const ok = QuoteRequest(
-        make: 'VW', year: 2020, driverAge: 30, cover: Cover.comprehensive);
-
-    await runOnce(svc, ok);
-
-    await for (final st in quoteStates(svc, ok).distinct()) { //https://api.flutter.dev/flutter/dart-async/Stream/distinct.html TODO confirm what was meant to change
-      print(describe(st));
-    }
-    await for (final st in quoteStates(svc, ok.copyWith(year: 1998))) {
-      print(describe(st));
-    }
-
-    final sw = Stopwatch()
-      ..start();
-    await Future.wait([svc.getQuote(ok), svc.getQuote(ok), svc.getQuote(ok)]);
-    print(
-        '3 parallel quotes in ${sw.elapsedMilliseconds} ms'); // ~1500, not 4500
-  }
-}
+// void main() async {
+//   // Lab 1
+//   // DONE: build three requests with copyWith, print each premium
+//   // DONE: print describe() for all four states
+//   const base = QuoteRequest(
+//       make: 'VW', year: 2020, driverAge: 30, cover: Cover.comprehensive);
+//   final young = base.copyWith(driverAge: 22);
+//   final old = base.copyWith(year: 2012, cover: Cover.thirdParty);
+//   for (final r in [base, young, old])
+//     print('${r.make} ${r.year} → ${calculatePremium(r).rands}');
+//   for (final s in [
+//     const QuoteIdle(),
+//     const QuoteLoading(),
+//     QuoteLoaded(Quote(id: 'q1', premium: calculatePremium(base))),
+//     const QuoteFailed('too old')
+//   ]) {
+//     print(describe(s));
+//
+//     // Lab 2
+//     final svc = FakeQuoteService();
+//     const ok = QuoteRequest(
+//         make: 'VW', year: 2020, driverAge: 30, cover: Cover.comprehensive);
+//
+//     await runOnce(svc, ok);
+//
+//     await for (final st in quoteStates(svc, ok).distinct()) { //https://api.flutter.dev/flutter/dart-async/Stream/distinct.html TODO confirm what was meant to change
+//       print(describe(st));
+//     }
+//     await for (final st in quoteStates(svc, ok.copyWith(year: 1998))) {
+//       print(describe(st));
+//     }
+//
+//     final sw = Stopwatch()
+//       ..start();
+//     await Future.wait([svc.getQuote(ok), svc.getQuote(ok), svc.getQuote(ok)]);
+//     print(
+//         '3 parallel quotes in ${sw.elapsedMilliseconds} ms'); // ~1500, not 4500
+//   }
+// }
