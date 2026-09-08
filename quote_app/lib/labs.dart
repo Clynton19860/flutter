@@ -174,7 +174,7 @@ void main() async {
 
     await runOnce(svc, ok);
 
-    await for (final st in quoteStates(svc, ok)) {
+    await for (final st in quoteStates(svc, ok).distinct()) { //https://api.flutter.dev/flutter/dart-async/Stream/distinct.html TODO confirm what was meant to change
       print(describe(st));
     }
     await for (final st in quoteStates(svc, ok.copyWith(year: 1998))) {
