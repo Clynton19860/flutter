@@ -2,10 +2,17 @@ import 'dart:async';
 
 enum Cover {
   thirdParty, thirdPartyFireTheft, comprehensive;
+
   double get factor => switch (this) {
         Cover.thirdParty => 0.6,
         Cover.thirdPartyFireTheft => 0.8,
         Cover.comprehensive => 1.0,
+      };
+
+  String get label => switch (this) {
+        Cover.thirdParty => 'Third party',
+        Cover.thirdPartyFireTheft => 'Third party, fire & theft',
+        Cover.comprehensive => 'Comprehensive',
       };
 }
 
