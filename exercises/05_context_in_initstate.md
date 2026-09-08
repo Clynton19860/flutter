@@ -2,6 +2,8 @@
 
 Paste the whole file into **dartpad.dev** (Flutter pad) and press Run.
 
+[//]: # TODO confrim lifecycle fix(https://mailharshkhatri.medium.com/understanding-didchangedependencies-in-flutter-a-guide-to-statefulwidget-lifecycle-methods-4b64d7883e25)
+[//]: # didChangeDependencies() runs right after initState() (once the widget is actually attached to the tree) and again whenever an inherited ancestor it depends on changes — so it's the safe place to call Theme.of(context)/MediaQuery.of(context).
 ```dart
 import 'package:flutter/material.dart';
 
@@ -14,19 +16,19 @@ class BrandHeader extends StatefulWidget {
 }
 
 class _BrandHeaderState extends State<BrandHeader> {
-  late final Color _accent;
+  late Color _accent;
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     _accent = Theme.of(context).colorScheme.primary;
   }
 
   @override
   Widget build(BuildContext context) => ColoredBox(
-        color: _accent,
-        child: const SizedBox(height: 80, width: double.infinity),
-      );
+    color: _accent,
+    child: const SizedBox(height: 80, width: double.infinity),
+  );
 }
 ```
 

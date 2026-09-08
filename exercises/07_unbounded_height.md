@@ -13,16 +13,18 @@ class SavedQuotes extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        body: Column(
-          children: [
-            const Text('Saved quotes'),
-            ListView.builder(
-              itemCount: quotes.length,
-              itemBuilder: (context, i) => ListTile(title: Text(quotes[i])),
-            ),
-          ],
+    body: Column(
+      children: [
+        const Text('Saved quotes'),
+        Expanded(
+          child: ListView.builder(
+            itemCount: quotes.length,
+            itemBuilder: (context, i) => ListTile(title: Text(quotes[i])),
+          ),
         ),
-      );
+      ],
+    ),
+  );
 }
 ```
 
@@ -41,3 +43,5 @@ This is the second most common layout error after overflow, and the message name
 ---
 
 Solution: `solutions/exercise_07.dart`
+
+ListView needs a bounded height to know how much to lay out/scroll, but Column gives children unbounded height — conflict throws the error. Fix: wrap the ListView in Expanded so it gets the remaining space instead of "unbounded."

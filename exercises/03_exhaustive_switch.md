@@ -14,11 +14,12 @@ class QuoteFailed extends QuoteState {
 }
 
 String describe(QuoteState s) => switch (s) {
-      QuoteIdle() => 'Fill in the form',
-      QuoteLoading() => 'Calculating',
-    };
+  QuoteIdle() => 'Fill in the form',
+  QuoteLoading() => 'Calculating',
+  QuoteFailed(:final message) => 'Err: $message'
+};
 
-void main() => print(describe(const QuoteIdle()));
+void main() => print(describe(const QuoteFailed('500')));
 ```
 
 ## What you should see

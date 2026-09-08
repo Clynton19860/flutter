@@ -8,7 +8,7 @@ class Driver {
 
   String greet() {
     if (nickname != null) {
-      return 'Hello ${nickname.toUpperCase()}';
+      return 'Hello ${nickname?.toUpperCase()}';
     }
     return 'Hello';
   }

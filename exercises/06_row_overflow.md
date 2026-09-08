@@ -12,20 +12,25 @@ class QuoteRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Quote summary')),
-        body: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              const Icon(Icons.directions_car),
-              const SizedBox(width: 8),
-              const Text('VW Polo 2020 1.4 TSI Comfortline 5-door'),
-              const SizedBox(width: 8),
-              const Text('R 1 450'),
-            ],
+    appBar: AppBar(title: const Text('Quote summary')),
+    body: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          const Icon(Icons.directions_car),
+          const SizedBox(width: 8),
+          const Expanded(
+            child: Text(
+              'VW Polo 2020 1.4 TSI Comfortline 5-door',
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
-        ),
-      );
+          const SizedBox(width: 8),
+          const Text('R 1 450'),
+        ],
+      ),
+    ),
+  );
 }
 ```
 

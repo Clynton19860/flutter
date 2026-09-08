@@ -2,6 +2,7 @@
 
 Paste the whole file into **dartpad.dev** (Dart pad) and press Run.
 
+[//]: # (TODO Clynton even with casting no deouble point)
 ```dart
 class Quote {
   const Quote({required this.premium});
@@ -10,7 +11,7 @@ class Quote {
 
 void main() {
   final json = {'premium': 1450};
-  final q = Quote(premium: json['premium'] as double);
+  final q = Quote(premium: json['premium'] as double); //  final q = Quote(premium: (json['premium'] as num).toDouble());
   print(q.premium);
 }
 ```
