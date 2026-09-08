@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 enum Cover {
   thirdParty,
@@ -107,10 +108,15 @@ abstract interface class QuoteService {
 }
 
 class FakeQuoteService implements QuoteService {
+  final _rand = Random();
+
   @override
   Future<Quote> getQuote(QuoteRequest r) async {
     await Future.delayed(const Duration(milliseconds: 1500));
     if (r.year < 2000) throw Exception('Vehicle too old to insure');
+    if (_rand.nextDouble() < 0.3) {
+      throw Exception('Service temporarily unavailable');
+    }
     return Quote(id: 'q-${r.hashCode}', premium: calculatePremium(r));
   }
 }
@@ -126,15 +132,23 @@ Future<void> runOnce(QuoteService s, QuoteRequest r) async {
   }
 }
 
+Future<Quote> _getQuoteWithRetry(QuoteService s, QuoteRequest r) async {
+  try {
+    return await s.getQuote(r);
+  } catch (_) {
+    await Future.delayed(const Duration(milliseconds: 500)); // back-off
+    return s.getQuote(r); // one retry, let it throw if it fails again
+  }
+}
+
 Stream<QuoteState> quoteStates(QuoteService s, QuoteRequest r) async* {
   yield const QuoteLoading();
   try {
-    yield QuoteLoaded(await s.getQuote(r));
+    yield QuoteLoaded(await _getQuoteWithRetry(s, r));
   } catch (e) {
     yield QuoteFailed(e.toString());
   }
 }
-
 void main() async {
   // Lab 1
   // DONE: build three requests with copyWith, print each premium
