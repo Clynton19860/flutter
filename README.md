@@ -321,8 +321,8 @@ void main() {
   count = 5;
   // count = 'five';          // compile error: String is not int
 
-  final createdAt = DateTime.now();   // set once, at runtime  (= JS const)
-  const vatRate = 0.15;               // compile-time constant
+  final createdAt = DateTime.now();   // set once, at runtime  (= JS const). Use case: API responses, database queries, current timestamps.
+  const vatRate = 0.15;               // compile-time constant. Use case: Hardcoded strings, colors, static widgets.
   const brand = 'Alpha Insure';
 
   double premium = 1450.0;            // explicit type where it helps the reader
@@ -957,3 +957,12 @@ Layout is the biggest gap in the pre-course survey, so this reading is the prepa
 ---
 
 *MO Integrations · Flutter Mobile Application Development · Day 1 of 5*
+
+CAN;T USE COLOR AND DECORAITIN
+
+1. What does flutter mean by the size from the child and width and height constraint from parent?
+2. Infinite width canvas - redners perfectly on al the different screens all the different time.
+3. Safe Area for phone camera and iPhone island
+4. Dismissed not on the UI e..g swipe to remove a product, click on undo and it comes back
+
+Rows children unbounded width. Wrapped in an expanded
