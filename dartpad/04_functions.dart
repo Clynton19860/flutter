@@ -8,7 +8,7 @@
 // ────────────────────────────────────────────────────────────
 
 double premium(double base, {required int age, bool comprehensive = true}) {
-  final loading = age < 25 ? 1.5 : 1.0;
+  final double loading = age < 25 ? 1.5 : 1.0;
   return comprehensive ? base * 1.4 * loading : base * loading;
 }
 
