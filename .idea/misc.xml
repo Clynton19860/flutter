@@ -2346,4 +2346,7 @@
       </list>
     </option>
   </component>
+  <component name="ProjectRootManager" version="2">
+    <output url="file://$PROJECT_DIR$/out" />
+  </component>
 </project>
