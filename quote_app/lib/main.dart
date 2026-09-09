@@ -1,5 +1,4 @@
 // import 'package:flutter/material.dart';
-// // import 'package:quote_app/app.dart';
 //
 // void main() {
 //   runApp(const MyApp());
@@ -123,7 +122,6 @@
 //     );
 //   }
 // }
-import 'package:flutter/material.dart';
-import 'package:quote_app/app.dart';
-
-void main() => runApp(const QuoteApp());
+      import 'package:flutter/material.dart';
+      import 'package:quote_app/app.dart';
+      void main() => runApp(const QuoteApp());

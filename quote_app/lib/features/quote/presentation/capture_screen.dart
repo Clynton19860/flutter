@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../domain/quote_model.dart';
+import './capture_form.dart';
+
 const largeScreenMinWidth = 700;
 
 class CaptureScreen extends StatelessWidget {
@@ -29,7 +32,7 @@ class CaptureScreen extends StatelessWidget {
                       child: const Card(
                         child: Padding(
                           padding: EdgeInsets.all(24),
-                          child: Text('Form goes here'),
+                          child:Text("data"),
                         ),
                       ),
                     ),
@@ -44,13 +47,22 @@ class CaptureScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
 
-                  children: const [
-                    _BrandHeader(),
-                    SizedBox(height: 24),
+                  children: [
+                    const _BrandHeader(),
+                    const SizedBox(height: 24),
                     Card(
                       child: Padding(
-                        padding: EdgeInsets.all(24),
-                        child: Text('Form goes here'),
+                        padding: const EdgeInsets.all(24),
+                        child: CaptureForm(
+                          onSubmit: (request) {
+                            final premium = calculatePremium(request);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Premium: R ${premium.toStringAsFixed(2)}'),
+                              ),
+                            );
+                          },
+                        )
                       ),
                     ),
                   ],
