@@ -14,22 +14,25 @@ class CaptureForm extends StatefulWidget {
 }
 
 class _CaptureFormState extends State<CaptureForm> {
+  final _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) => Form(
-        child: Column(
-          children: [
-            TextFormField(
-              validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
-            ),
-            FilledButton(
-              onPressed: () {
-                if (Form.of(context).validate()) {}
-              },
-              child: const Text('Submit'),
-            ),
-          ],
+    key: _formKey, // https://docs.flutter.dev/cookbook/forms/validation#1-create-a-form-with-a-globalkey
+    child: Column(
+      children: [
+        TextFormField(
+          validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
         ),
-      );
+        FilledButton(
+          onPressed: () {
+            if (_formKey.currentState!.validate()) {} //api.flutter.dev/flutter/widgets/BuildContext-class.html
+          },
+          child: const Text('Submit'),
+        ),
+      ],
+    ),
+  );
 }
 ```
 
