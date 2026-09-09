@@ -2,12 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
 import 'package:quote_app/features/quote/presentation/capture_form.dart';
 
+import '../../../core/theme/brand_theme.dart';
+
 class CaptureScreen extends StatelessWidget {
-  const CaptureScreen({super.key});
+  final BrandTheme brand;
+  final VoidCallback? onSwitchBrand;
+
+  const CaptureScreen({super.key, required this.brand, this.onSwitchBrand});
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Get a quote')),
+    appBar: AppBar(leading: const BackButton(), centerTitle: true, title: Text(brand.name), actions: [
+      IconButton(onPressed: onSwitchBrand, icon: const Icon(Icons.swap_horiz_sharp)),
+    ]),
     body: SafeArea(
       child: Column(
         children: [
@@ -34,17 +41,18 @@ class CaptureScreen extends StatelessWidget {
       Positioned(
         left: 16,
         top: 16,
-        child: Text('Alpha Insure', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white)),
+        child: Text(brand.name, style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white)),
       ),
       Positioned(
         right: 16,
         bottom: -20,
-        child: Chip(label: const Text('Comprehensive'), backgroundColor: Colors.white),
+        child: Chip(label: const Text('Comprehensive'), backgroundColor: Theme.of(context).colorScheme.secondary),
       ),
       Positioned.fill(
         child: Align(
           alignment: Alignment.center,
-          child: Icon(Icons.shield, size: 48, color: Colors.white24),
+          // child: Icon(Icons.shield, size: 48, color: Theme.of(context).colorScheme.onPrimary),
+          child: Image.asset(brand.logoAsset, width: 48, height: 48, color: Theme.of(context).colorScheme.onPrimary),
         ),
       ),
     ],
