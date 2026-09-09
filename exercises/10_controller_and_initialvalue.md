@@ -14,14 +14,19 @@ class MakeField extends StatefulWidget {
 }
 
 class _MakeFieldState extends State<MakeField> {
-  final _controller = TextEditingController();
+  final _controller = TextEditingController(text: 'VW');
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) => TextFormField(
-        controller: _controller,
-        initialValue: 'VW',
-        decoration: const InputDecoration(labelText: 'Make'),
-      );
+    controller: _controller,
+    decoration: const InputDecoration(labelText: 'Make'),
+  );
 }
 ```
 
