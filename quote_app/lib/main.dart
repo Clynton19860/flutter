@@ -1,3 +1,5 @@
+import 'dart:async';
+
 // ---------- 1. Cover ----------
 enum Cover {
   thirdParty, thirdPartyFireTheft, comprehensive;
@@ -22,7 +24,7 @@ class QuoteRequest {
   final int driverAge;
   final Cover cover;
 
-  const QuoteRequest({required this.make, required this.model, required this.year, required this.driverAge, required this.cover});
+  const QuoteRequest({required this.make, this.model, required this.year, required this.driverAge, required this.cover});
 
   QuoteRequest copyWith({String? make, String? model, int? year, int? driverAge, Cover? cover}){
     return QuoteRequest(make: make ?? this.make, model: model ?? this.model, year: year ?? this.year,
@@ -85,6 +87,7 @@ class Idle implements QuoteState{
 }
 
 class Loading implements QuoteState{
+  const Loading();
 }
 
 class Loaded implements QuoteState{
@@ -98,9 +101,42 @@ class Failed implements QuoteState{
   Failed({this.message = 'Something went wrong'});
 }
 
-void main() {
+abstract interface class QuoteService {
+  Future<Quote> getQuote(QuoteRequest r);
+}
+
+class FakeQuoteService implements QuoteService {
+  @override
+  Future<Quote> getQuote(QuoteRequest r) async {
+    await Future.delayed(const Duration(milliseconds: 1500));
+    if (r.year < 2000) throw Exception('Vehicle too old to insure');
+    return Quote(id: 'q-${r.hashCode}', premium: calculatePremium(r));
+  }
+}
+
+Future<void> runOnce(QuoteService s, QuoteRequest r) async {
+  try {
+    final q = await s.getQuote(r).timeout(const Duration(seconds: 3));
+    print('OK ${q.display}');
+  } on TimeoutException {
+    print('Timed out');
+  } catch (e) {
+    print('Failed: $e');
+  }
+}
+
+Stream<QuoteState> quoteStates(QuoteService s, QuoteRequest r) async* {
+  yield const Loading();
+  try {
+    yield Loaded(quote: await s.getQuote(r));
+  } catch (e) {
+    yield Failed(message: e.toString());
+  }
+}
+
+void main() async {
   // TODO: build three requests with copyWith, print each premium
-  QuoteRequest emptyRequest = QuoteRequest(make: '', model: '', year: 2026, driverAge: 18, cover: Cover.comprehensive);
+  /*QuoteRequest emptyRequest = QuoteRequest(make: '', model: '', year: 2026, driverAge: 18, cover: Cover.comprehensive);
   List<QuoteRequest> requests = [
     emptyRequest.copyWith(make: 'FORD', model: 'EVEREST', year: 2020, driverAge: 35, cover: Cover.comprehensive),
   emptyRequest.copyWith(make: 'RENAULT', model: 'DUSTER', year: 2020, driverAge: 18, cover: Cover.thirdParty),
@@ -115,5 +151,21 @@ void main() {
   print(describe(Idle()));
   print(describe(Loading()));
   print(describe(Loaded(quote: Quote(id: 'Premium', premium: 1000))));
-  print(describe(Failed(message: 'too old')));
+  print(describe(Failed(message: 'too old')));*/
+
+  final svc = FakeQuoteService();
+  const ok = QuoteRequest(make: 'VW', year: 2020, driverAge: 30, cover: Cover.comprehensive);
+
+  await runOnce(svc, ok);
+
+  await for (final st in quoteStates(svc, ok)) {
+    print(describe(st));
+  }
+  await for (final st in quoteStates(svc, ok.copyWith(year: 1998))) {
+    print(describe(st));
+  }
+
+  final sw = Stopwatch()..start();
+  await Future.wait([svc.getQuote(ok), svc.getQuote(ok), svc.getQuote(ok)]);
+  print('3 parallel quotes in ${sw.elapsedMilliseconds} ms');   // ~1500, not 4500
 }
