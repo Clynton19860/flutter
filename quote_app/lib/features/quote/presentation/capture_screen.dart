@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:quote_app/core/theme/brand_provider.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
 import 'package:quote_app/features/quote/presentation/capture_form.dart';
+import 'package:quote_app/features/quote/presentation/premium_card.dart';
+import 'package:quote_app/features/quote/presentation/quote_providers.dart';
 
 class CaptureScreen extends ConsumerStatefulWidget {
   const CaptureScreen({super.key});
@@ -12,16 +14,19 @@ class CaptureScreen extends ConsumerStatefulWidget {
 }
 
 class _CaptureScreenState extends ConsumerState<CaptureScreen> {
-  void _showPremium(BuildContext context, QuoteRequest r) {
-    final premium = calculatePremium(r);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Premium ${premium.rands}')),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final brand = ref.watch(brandProvider);
+    final state = ref.watch(quoteProvider);
+
+    // Side effect, so it goes here and not in the returned tree.
+    ref.listen(quoteProvider, (prev, next) {
+      if (next is QuoteFailed) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(next.message)));
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: Text(brand.name),
@@ -39,7 +44,27 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
             const header = _BrandHeader();
             final body = Padding(
               padding: const EdgeInsets.all(16),
-              child: CaptureForm(onSubmit: (r) => _showPremium(context, r)),
+              child: Column(
+                children: [
+                  CaptureForm(
+                    enabled: state is! QuoteLoading,
+                    onSubmit: (r) =>
+                        ref.read(quoteProvider.notifier).submit(r),
+                  ),
+                  const SizedBox(height: 16),
+                  switch (state) {
+                    QuoteIdle() =>
+                      const Text('Fill in the form to get a quote'),
+                    QuoteLoading() => const CircularProgressIndicator(),
+                    QuoteLoaded(:final quote) => PremiumCard(quote: quote),
+                    QuoteFailed(:final message) => Text(
+                        message,
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.error),
+                      ),
+                  },
+                ],
+              ),
             );
 
             if (c.maxWidth >= 700) {
