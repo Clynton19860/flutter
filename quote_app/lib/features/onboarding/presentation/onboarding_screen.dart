@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:quote_app/core/storage/onboarding_provider.dart';
+import 'package:quote_app/core/storage/prefs_providers.dart';
 import 'package:quote_app/core/theme/brand_provider.dart';
 
 class OnboardingScreen extends ConsumerWidget {

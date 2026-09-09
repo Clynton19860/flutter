@@ -1,12 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:quote_app/core/storage/prefs_providers.dart';
 import 'brand_theme.dart';
 
 class BrandKeyNotifier extends Notifier<String> {
   @override
-  String build() => 'alpha';
+  String build() => ref.watch(brandKeyStoreProvider).read();
 
-  void set(String key) => state = key;
-  void toggle() => state = state == 'alpha' ? 'beta' : 'alpha';
+  Future<void> set(String key) async {
+    await ref.read(brandKeyStoreProvider).write(key);
+    state = key;
+  }
+
+  Future<void> toggle() => set(state == 'alpha' ? 'beta' : 'alpha');
 }
 
 final brandKeyProvider =

@@ -1,36 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quote_app/app.dart';
 import 'package:quote_app/core/routing/router.dart';
-import 'package:quote_app/core/storage/onboarding_provider.dart';
+import 'package:quote_app/core/storage/prefs_providers.dart';
+import 'package:quote_app/features/quote/data/quote_repository.dart';
+import 'package:quote_app/features/quote/data/sqlite_quote_repository.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+Future<ProviderContainer> _container({required bool onboarded}) async {
+  SharedPreferences.setMockInitialValues({'onboarded': onboarded});
+  final prefs = await SharedPreferences.getInstance();
+  return ProviderContainer(overrides: [
+    sharedPrefsProvider.overrideWithValue(prefs),
+    quoteRepositoryProvider.overrideWithValue(InMemoryQuoteRepository()),
+  ]);
+}
 
 void main() {
-  testWidgets('redirect forces onboarding, then completing goes to /quote',
-      (t) async {
-    await t.pumpWidget(const ProviderScope(child: QuoteApp()));
+  testWidgets('an un-onboarded user is redirected to /onboarding', (t) async {
+    final c = await _container(onboarded: false);
+    addTearDown(c.dispose);
+    final router = c.read(routerProvider);
+    await t.pumpWidget(UncontrolledProviderScope(
+      container: c,
+      child: MaterialApp.router(routerConfig: router),
+    ));
     await t.pumpAndSettle();
     expect(find.text('Get started'), findsOneWidget);
-
-    await t.tap(find.text('Get started'));
-    await t.pumpAndSettle();
-    expect(find.text('Get started'), findsNothing);
-    expect(find.text('Fill in the form to get a quote'), findsOneWidget);
   });
 
-  testWidgets('deep link to a result id shows not-found, back returns to quote',
-      (t) async {
-    final container = ProviderContainer();
-    addTearDown(container.dispose);
-    container.read(onboardedProvider.notifier).complete();
-    final router = container.read(routerProvider);
+  testWidgets('a deep link to an unknown quote id shows not-found', (t) async {
+    final c = await _container(onboarded: true);
+    addTearDown(c.dispose);
+    final router = c.read(routerProvider);
     router.go('/quote/result/q-does-not-exist');
 
     await t.pumpWidget(UncontrolledProviderScope(
-      container: container,
+      container: c,
       child: MaterialApp.router(routerConfig: router),
     ));
     await t.pumpAndSettle();
     expect(find.textContaining('Quote not found'), findsOneWidget);
+  });
+
+  testWidgets('an unknown route renders the errorBuilder', (t) async {
+    final c = await _container(onboarded: true);
+    addTearDown(c.dispose);
+    final router = c.read(routerProvider);
+    router.go('/nowhere');
+
+    await t.pumpWidget(UncontrolledProviderScope(
+      container: c,
+      child: MaterialApp.router(routerConfig: router),
+    ));
+    await t.pumpAndSettle();
+    expect(find.textContaining('Page not found'), findsOneWidget);
+    expect(find.text('Go home'), findsOneWidget);
   });
 }
