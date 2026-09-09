@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
+import 'package:quote_app/features/quote/presentation/capture_form.dart';
 
 class CaptureScreen extends StatelessWidget {
   const CaptureScreen({super.key});
@@ -10,14 +11,7 @@ class CaptureScreen extends StatelessWidget {
     body: SafeArea(
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final form = Card(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Center(
-                child: Text('Form goes here', style: Theme.of(context).textTheme.bodyLarge),
-              ),
-            ),
-          );
+          final form = CaptureForm(onSubmit: (r) => _showPremium(context, r));
 
           if (constraints.maxWidth >= 700) {
             return Row(
@@ -42,6 +36,11 @@ class CaptureScreen extends StatelessWidget {
       ),
     ),
   );
+
+  void _showPremium(BuildContext context, QuoteRequest r) {
+    final premium = calculatePremium(r);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Premium ${premium.rands}')));
+  }
 }
 
 class _BrandHeader extends StatelessWidget {

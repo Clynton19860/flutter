@@ -5,6 +5,7 @@
       "name": "quote_app (Android emulator)",
       "request": "launch",
       "type": "dart",
+      "cwd": "quote_app",
       "program": "lib/main.dart",
       "deviceId": "emulator"
     },
@@ -12,6 +13,7 @@
       "name": "quote_app (Chrome fallback)",
       "request": "launch",
       "type": "dart",
+      "cwd": "quote_app",
       "program": "lib/main.dart",
       "deviceId": "chrome"
     }
