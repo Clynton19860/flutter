@@ -4,25 +4,55 @@ Paste the whole file into **dartpad.dev** (Flutter pad) and press Run.
 
 ```dart
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-void main() => runApp(const MaterialApp(home: SavedQuotes()));
+void main() {
+  runApp(
+    ChangeNotifierProvider<QuoteData>(
+      create: (context) => QuoteData(),
+      builder: (context, child) => const MaterialApp(
+        home: SavedQuotes(),
+      ),
+    ),
+  );
+}
+
+class QuoteData extends ChangeNotifier {
+  final List<String> _quotes = ['VW Polo', 'BMW 320i', 'Toyota Corolla'];
+  List<String> get quotes => List.unmodifiable(_quotes);
+
+  void addQuote(String quote) {
+    _quotes.add(quote);
+    notifyListeners();
+  }
+}
 
 class SavedQuotes extends StatelessWidget {
   const SavedQuotes({super.key});
-  static const quotes = ['VW Polo', 'BMW 320i', 'Toyota Corolla'];
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        body: Column(
-          children: [
-            const Text('Saved quotes'),
-            ListView.builder(
-              itemCount: quotes.length,
-              itemBuilder: (context, i) => ListTile(title: Text(quotes[i])),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Saved quotes'),
+      ),
+      body: Consumer<QuoteData>(
+        builder: (context, data, child) {
+          return ListView.builder(
+            itemCount: data.quotes.length,
+            itemBuilder: (context, i) => ListTile(
+              leading: const Icon(Icons.directions_car),
+              title: Text(data.quotes[i]),
             ),
-          ],
-        ),
-      );
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.read<QuoteData>().addQuote('New Vehicle ${DateTime.now().second}'),
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
 }
 ```
 

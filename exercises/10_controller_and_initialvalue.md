@@ -9,19 +9,41 @@ void main() => runApp(const MaterialApp(home: Scaffold(body: MakeField())));
 
 class MakeField extends StatefulWidget {
   const MakeField({super.key});
+
   @override
   State<MakeField> createState() => _MakeFieldState();
 }
 
 class _MakeFieldState extends State<MakeField> {
-  final _controller = TextEditingController();
+  late final TextEditingController _controller;
 
   @override
-  Widget build(BuildContext context) => TextFormField(
+  void initState() {
+    super.initState();
+    // Initialize the controller with the value instead of setting initialValue
+    _controller = TextEditingController(text: 'VW');
+  }
+
+  @override
+  void dispose() {
+    // Dispose the controller to prevent memory leaks
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: TextFormField(
         controller: _controller,
-        initialValue: 'VW',
-        decoration: const InputDecoration(labelText: 'Make'),
-      );
+        decoration: const InputDecoration(
+          labelText: 'Make',
+          border: OutlineInputBorder(),
+        ),
+      ),
+    );
+  }
 }
 ```
 

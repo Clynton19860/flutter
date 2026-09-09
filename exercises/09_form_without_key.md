@@ -5,31 +5,58 @@ Paste the whole file into **dartpad.dev** (Flutter pad) and press Run.
 ```dart
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MaterialApp(home: Scaffold(body: CaptureForm())));
+void main() => runApp(const MaterialApp(home: Scaffold(body: SafeArea(child: CaptureForm()))));
 
 class CaptureForm extends StatefulWidget {
   const CaptureForm({super.key});
+
   @override
   State<CaptureForm> createState() => _CaptureFormState();
 }
 
 class _CaptureFormState extends State<CaptureForm> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _controller = TextEditingController();
+
   @override
-  Widget build(BuildContext context) => Form(
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Form(
+        key: _formKey,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             TextFormField(
-              validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
+              controller: _controller,
+              decoration: const InputDecoration(
+                labelText: 'Input Value',
+                border: OutlineInputBorder(),
+              ),
+              validator: (v) => (v == null || v.isEmpty) ? 'This field is required' : null,
             ),
+            const SizedBox(height: 16),
             FilledButton(
               onPressed: () {
-                if (Form.of(context).validate()) {}
+                if (_formKey.currentState?.validate() ?? false) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Processing: ${_controller.text}')),
+                  );
+                }
               },
               child: const Text('Submit'),
             ),
           ],
         ),
-      );
+      ),
+    );
+  }
 }
 ```
 
