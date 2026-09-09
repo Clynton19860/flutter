@@ -7,14 +7,21 @@ class Driver {
   String? nickname;
 
   String greet() {
-    if (nickname != null) {
-      return 'Hello ${nickname.toUpperCase()}';
+    final localNickname = nickname;
+
+    if (localNickname != null) {
+      return 'Hello ${localNickname.toUpperCase()}';
     }
     return 'Hello';
   }
 }
 
 void main() => print(Driver()..nickname = 'Sive');
+  final driver = Driver()..nickname = 'Sive';
+  print(driver.greet());
+
+  driver.nickname = null;
+  print(driver.greet());
 ```
 
 ## What you should see

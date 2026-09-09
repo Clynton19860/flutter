@@ -6,19 +6,39 @@ Paste the whole file into **dartpad.dev** (Dart pad) and press Run.
 sealed class QuoteState {
   const QuoteState();
 }
-class QuoteIdle extends QuoteState { const QuoteIdle(); }
-class QuoteLoading extends QuoteState { const QuoteLoading(); }
+
+class QuoteIdle extends QuoteState { 
+  const QuoteIdle(); 
+}
+
+class QuoteLoading extends QuoteState { 
+  const QuoteLoading(); 
+}
+
 class QuoteFailed extends QuoteState {
   const QuoteFailed(this.message);
   final String message;
 }
 
+/// Describes the current quote state.
+/// The compiler ensures that all subclasses of [QuoteState] are handled.
 String describe(QuoteState s) => switch (s) {
       QuoteIdle() => 'Fill in the form',
       QuoteLoading() => 'Calculating',
+      QuoteFailed(message: final msg) => 'Error: $msg';
     };
 
-void main() => print(describe(const QuoteIdle()));
+void main() {
+  const states = [
+    QuoteIdle(),
+    QuoteLoading(),
+    QuoteFailed('Connection timeout')
+  ];
+
+  for (final state in states) {
+    print(describe(state));
+  }
+};
 ```
 
 ## What you should see

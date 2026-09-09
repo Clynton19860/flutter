@@ -3,15 +3,46 @@
 Paste the whole file into **dartpad.dev** (Dart pad) and press Run.
 
 ```dart
+import 'dart:convert';
+
+/// Represents a financial quote.
+/// Uses a flexible constructor to handle JSON-style numeric inputs,
+/// ensuring that both [int] and [double] values from API responses
+/// are correctly converted to [double].
 class Quote {
   const Quote({required this.premium});
+
+  /// Factory constructor to safely parse JSON data.
+  factory Quote.fromJson(Map<String, dynamic> json) {
+    final rawPremium = json['premium'];
+
+    // Handle potential int/double variations in JSON numbers
+    final double premium = (rawPremium is num) 
+        ? rawPremium.toDouble() 
+        : double.tryParse(rawPremium.toString()) ?? 0.0;
+
+    return Quote(premium: premium);
+  }
+
   final double premium;
 }
 
 void main() {
-  final json = {'premium': 1450};
-  final q = Quote(premium: json['premium'] as double);
-  print(q.premium);
+  // Simulating an API response where the value might arrive as an int
+  final Map<String, dynamic> jsonInt = {'premium': 1450};
+  
+  // Simulating an API response where the value might arrive as a double
+  final Map<String, dynamic> jsonDouble = {'premium': 1450.50};
+
+  try {
+    final q1 = Quote.fromJson(jsonInt);
+    final q2 = Quote.fromJson(jsonDouble);
+
+    print('Quote 1 Premium: ${q1.premium}');
+    print('Quote 2 Premium: ${q2.premium}');
+  } catch (e) {
+    print('Failed to parse quote: $e');
+  }
 }
 ```
 

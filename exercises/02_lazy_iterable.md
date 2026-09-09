@@ -4,13 +4,23 @@ Paste the whole file into **dartpad.dev** (Dart pad) and press Run.
 
 ```dart
 void main() {
-  final byMake = {'VW': 1200.0, 'BMW': 2100.0, 'Toyota': 900.0};
+  final byMake = {
+    'VW': 1200.0, 
+    'BMW': 2100.0, 
+    'Toyota': 900.0};
 
+  // .where() and .map() are lazy. They return an Iterable that is evaluated 
+  // only when iterated (e.g., in a loop, toList(), or print()).
+  // Currently, 'cheap' is an Iterable<String>, not a List<String>.
   final List<String> cheap = byMake.entries
       .where((e) => e.value < 2000)
       .map((e) => e.key);
 
-  print(cheap);
+  // To force evaluation and get a concrete List, .toList()
+  final List<String> cheapList = cheap.toList();
+
+  print('As an Iterable (lazy): $cheap');
+  print('As a List (eager): $cheapList');
 }
 ```
 
