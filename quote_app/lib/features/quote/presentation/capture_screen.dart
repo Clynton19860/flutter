@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
+import 'package:quote_app/features/quote/presentation/capture_form.dart';
 
 class CaptureScreen extends StatelessWidget {
   const CaptureScreen({super.key});
@@ -7,7 +8,17 @@ class CaptureScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(title: const Text('Get a quote')),
-    body: SafeArea(child: Column(children: [_brandHeader(context), _formy(context)])),
+    body: SafeArea(
+      child: Column(
+        children: [
+          _brandHeader(context),
+          SizedBox(height: 16),
+          Expanded(
+            child: ListView(scrollDirection: Axis.vertical, children: [_formy(context)]),
+          ),
+        ],
+      ),
+    ),
   );
 
   Stack _brandHeader(BuildContext context) => Stack(
@@ -40,6 +51,7 @@ class CaptureScreen extends StatelessWidget {
   );
 
   LayoutBuilder _formy(BuildContext context) {
+    /// TODO: Are they doing anything below?
     final size = MediaQuery.sizeOf(context);
     final isWide = size.width >= 700;
 
@@ -49,11 +61,19 @@ class CaptureScreen extends StatelessWidget {
         return twoColumn
             ? Row(
                 children: [
-                  Expanded(child: form()),
-                  Expanded(child: summary()),
+                  // SizedBox(
+                    // width: 700,
+                    CaptureForm(onSubmit: (request) => _calculatePremium(request, context)),
+                  // ),
+                  summary(),
                 ],
               )
-            : Column(children: [form(), summary()]);
+            : Column(
+                children: [
+                  CaptureForm(onSubmit: (request) => _calculatePremium(request, context)),
+                  summary(),
+                ],
+              );
       },
     );
   }
@@ -63,9 +83,26 @@ class CaptureScreen extends StatelessWidget {
       child: Padding(padding: EdgeInsets.all(16), child: Text('Form goes here')),
     ),
   );
+
   Widget summary() => Card(
     child: const Padding(padding: EdgeInsets.all(16), child: Text('Summary goes here')),
   );
+
+  _calculatePremium(QuoteRequest request, context) async {
+    var premium = calculatePremium(request);
+
+    await Future.delayed(const Duration(seconds: 1));
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Premium calculated'),
+        content: Text('Your premium is ${premium.rands}'),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('OK')),
+        ],
+      ),
+    );
+  }
 }
 
 /// TODO not sure if this is going to be used in the future
