@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:quote_app/core/theme/brand_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:quote_app/core/theme/brand_provider.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
 import 'package:quote_app/features/quote/presentation/capture_form.dart';
 
-class CaptureScreen extends StatelessWidget {
-  const CaptureScreen({
-    super.key,
-    required this.brand,
-    required this.onSwitchBrand,
-  });
+class CaptureScreen extends ConsumerStatefulWidget {
+  const CaptureScreen({super.key});
 
-  final BrandTheme brand;
-  final VoidCallback onSwitchBrand;
+  @override
+  ConsumerState<CaptureScreen> createState() => _CaptureScreenState();
+}
 
+class _CaptureScreenState extends ConsumerState<CaptureScreen> {
   void _showPremium(BuildContext context, QuoteRequest r) {
     final premium = calculatePremium(r);
     ScaffoldMessenger.of(context).showSnackBar(
@@ -22,6 +21,7 @@ class CaptureScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final brand = ref.watch(brandProvider);
     return Scaffold(
       appBar: AppBar(
         title: Text(brand.name),
@@ -29,15 +29,14 @@ class CaptureScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.swap_horiz),
             tooltip: 'Switch brand',
-            onPressed: onSwitchBrand,
+            onPressed: () => ref.read(brandKeyProvider.notifier).toggle(),
           ),
         ],
       ),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, c) {
-            final header =
-                _BrandHeader(name: brand.name, logoAsset: brand.logoAsset);
+            const header = _BrandHeader();
             final body = Padding(
               padding: const EdgeInsets.all(16),
               child: CaptureForm(onSubmit: (r) => _showPremium(context, r)),
@@ -62,13 +61,14 @@ class CaptureScreen extends StatelessWidget {
   }
 }
 
-class _BrandHeader extends StatelessWidget {
-  const _BrandHeader({required this.name, required this.logoAsset});
-  final String name;
-  final String logoAsset;
+class _BrandHeader extends ConsumerWidget {
+  const _BrandHeader();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final brand = ref.watch(brandProvider);
+    final name = brand.name;
+    final logoAsset = brand.logoAsset;
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     return Padding(
