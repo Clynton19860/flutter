@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:quote_app/core/extensions/money_extension.dart';
+import 'capture_form.dart';
+import 'package:quote_app/features/quote/domain/quote_model.dart';
+
 
 class CaptureScreen extends StatelessWidget {
   const CaptureScreen({super.key,});
+
 
   @override
   Widget build(BuildContext context) =>
@@ -20,18 +24,41 @@ class CaptureScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         _BrandHeader(),
+                        const SizedBox(height: 32),
+
+                    CaptureForm(
+                      onSubmit: (request) {
+                        final premium = calculatePremium(request);
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Premium: R${premium.toStringAsFixed(2)}',
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                       ],
                     ),
                   );
                 }
 
                 return Row(
-                    children: const [
-                      SizedBox(
-                        width: 320,
-                        child: _BrandHeader(),
+                  children: [
+                    const SizedBox(
+                      width: 320,
+                      child: _BrandHeader(),
+                    ),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(16),
+                        child: CaptureForm(
+                          onSubmit: (_) {},
+                        ),
                       ),
-                    ]
+                    ),
+                  ],
                 );
               },
               )
