@@ -11,6 +11,11 @@ enum Cover {
     Cover.thirdPartyFireTheft => 0.8,
     Cover.comprehensive => 1.0,
   };
+  String get label => switch (this) {
+    Cover.thirdParty => 'Third party',
+    Cover.thirdPartyFireTheft => 'Third party, fire & theft',
+    Cover.comprehensive => 'Comprehensive',
+  };
 }
 // TODO: double get factor => switch (this) { ... 0.6 / 0.8 / 1.0 ... };
 
