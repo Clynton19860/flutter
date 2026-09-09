@@ -166,6 +166,20 @@ void main() async {
   print(Quote.fromJson({'id': 'q2', 'premium': 700}).display);
 
 
+  final svc = FakeQuoteService();
+  const ok = QuoteRequest(make: 'VW', year: 2020, driverAge: 30, cover: Cover.comprehensive);
 
+  await runOnce(svc, ok);
+
+  await for (final st in quoteStates(svc, ok)) {
+    print(describe(st));
+  }
+  await for (final st in quoteStates(svc, ok.copyWith(year: 1998))) {
+    print(describe(st));
+  }
+
+  final sw = Stopwatch()..start();
+  await Future.wait([svc.getQuote(ok), svc.getQuote(ok), svc.getQuote(ok)]);
+  print('3 parallel quotes in ${sw.elapsedMilliseconds} ms');   // ~1500, not 4500
 
 }
