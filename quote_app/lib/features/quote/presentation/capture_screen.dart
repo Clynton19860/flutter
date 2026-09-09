@@ -1,41 +1,82 @@
 import 'package:flutter/material.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
 
-class CaptureScreen extends StatefulWidget {
+class CaptureScreen extends StatelessWidget {
   const CaptureScreen({super.key});
-
-  @override
-  State<CaptureScreen> createState() => _CaptureScreenState();
-}
-
-class _CaptureScreenState extends State<CaptureScreen> {
-  Cover _cover = Cover.comprehensive;
-  double? _premium;
-
-  void _calculate() {
-    final r = QuoteRequest(make: 'VW', year: 2020, driverAge: 30, cover: _cover);
-    setState(() => _premium = calculatePremium(r));
-  }
 
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(title: const Text('Get a quote')),
-    body: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          SegmentedButton<Cover>(
-            segments: [for (final c in Cover.values) ButtonSegment(value: c, label: Text(c.name))],
-            selected: {_cover},
-            onSelectionChanged: (s) => setState(() => _cover = s.first),
-          ),
-          const SizedBox(height: 24),
-          FilledButton(onPressed: _calculate, child: const Text('Calculate')),
-          const SizedBox(height: 24),
-          if (_premium != null) PremiumBadge(amount: _premium!),
-        ],
+    body: SafeArea(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final form = Card(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Center(
+                child: Text('Form goes here', style: Theme.of(context).textTheme.bodyLarge),
+              ),
+            ),
+          );
+
+          if (constraints.maxWidth >= 700) {
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(
+                  width: 280,
+                  child: Padding(padding: EdgeInsets.all(16), child: _BrandHeader()),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(padding: const EdgeInsets.all(16), child: form),
+                ),
+              ],
+            );
+          }
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(children: [const _BrandHeader(), const SizedBox(height: 16), form]),
+          );
+        },
       ),
     ),
+  );
+}
+
+class _BrandHeader extends StatelessWidget {
+  const _BrandHeader();
+
+  @override
+  Widget build(BuildContext context) => Stack(
+    clipBehavior: Clip.none,
+    children: [
+      Container(
+        height: 120,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primary,
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+      Positioned(
+        left: 16,
+        top: 16,
+        child: Text(
+          'Quote App',
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+        ),
+      ),
+      Positioned(
+        right: 16,
+        bottom: -14,
+        child: Chip(
+          label: const Text('Comprehensive'),
+          backgroundColor: Theme.of(context).colorScheme.surface,
+        ),
+      ),
+    ],
   );
 }
 
