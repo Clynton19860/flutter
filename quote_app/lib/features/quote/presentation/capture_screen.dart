@@ -1,8 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
+import 'package:quote_app/features/quote/presentation/capture_form.dart';
 
 class CaptureScreen extends StatelessWidget {
   const CaptureScreen({super.key});
+
+  void _showPremium(BuildContext context, QuoteRequest r) {
+    final premium = calculatePremium(r);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Premium ${premium.rands}'),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -10,19 +21,31 @@ class CaptureScreen extends StatelessWidget {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
+            // Mobile layout
             if (constraints.maxWidth < 700) {
               return SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: const [
-                    _BrandHeader(),
-                    SizedBox(height: 24)
+                  children: [
+                    const _BrandHeader(),
+
+                    const SizedBox(height: 24),
+
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: CaptureForm(
+                          onSubmit: (r) => _showPremium(context, r),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               );
             }
 
+            // Large screen layout
             return Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -30,10 +53,20 @@ class CaptureScreen extends StatelessWidget {
                   width: 320,
                   child: _BrandHeader(),
                 ),
+
                 const SizedBox(width: 24),
+
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(16)
+                    padding: const EdgeInsets.all(16),
+                    child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: CaptureForm(
+                          onSubmit: (r) => _showPremium(context, r),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -44,7 +77,6 @@ class CaptureScreen extends StatelessWidget {
     );
   }
 }
-
 class _BrandHeader extends StatelessWidget {
   const _BrandHeader();
 
@@ -79,5 +111,3 @@ class _BrandHeader extends StatelessWidget {
     );
   }
 }
-
-
