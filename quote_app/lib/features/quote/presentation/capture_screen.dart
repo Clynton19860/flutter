@@ -1,62 +1,83 @@
 import 'package:flutter/material.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
 
-class CaptureScreen extends StatefulWidget {
+class CaptureScreen extends StatelessWidget {
   const CaptureScreen({super.key});
 
   @override
-  State<CaptureScreen> createState() => _CaptureScreenState();
-}
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            if (constraints.maxWidth < 700) {
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: const [
+                    _BrandHeader(),
+                    SizedBox(height: 24)
+                  ],
+                ),
+              );
+            }
 
-class _CaptureScreenState extends State<CaptureScreen> {
-  Cover _cover = Cover.comprehensive;
-  double? _premium;
-
-  void _calculate() {
-    final r = QuoteRequest(
-      make: 'VW',
-      year: 2020,
-      driverAge: 22,
-      cover: _cover,
-    );
-    setState(() => _premium = calculatePremium(r));
-  }
-
-  @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Get a quote')),
-    body: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          SegmentedButton<Cover>(
-            segments: [
-              for (final c in Cover.values)
-                ButtonSegment(value: c, label: Text(c.name)),
-            ],
-            selected: {_cover},
-            onSelectionChanged: (s) => setState(() => _cover = s.first),
-          ),
-          const SizedBox(height: 20),
-          FilledButton(
-            onPressed: _calculate,
-            child: const Text('Calculate'),
-          ),
-          const SizedBox(height: 24),
-          if (_premium != null) PremiumBadge(amount: _premium!),
-        ],
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(
+                  width: 320,
+                  child: _BrandHeader(),
+                ),
+                const SizedBox(width: 24),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16)
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
-class PremiumBadge extends StatelessWidget {
-  const PremiumBadge({super.key, required this.amount});
-  final double amount;
+class _BrandHeader extends StatelessWidget {
+  const _BrandHeader();
 
   @override
-  Widget build(BuildContext context) => Text(
-    amount.rands,
-    style: Theme.of(context).textTheme.headlineMedium,
-  );
+  Widget build(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          height: 160,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primary,
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        Positioned(
+          left: 16, top: 16,
+          child: Text('Alpha Insure',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white)),
+        ),
+        Positioned(
+          right: 16, bottom: -20,
+          child: Chip(label: const Text('Comprehensive'), backgroundColor: Colors.white),
+        ),
+        const Positioned.fill(
+          child: Align(
+            alignment: Alignment.center,
+            child: Icon(Icons.shield, size: 48, color: Colors.white24),
+          ),
+        ),
+      ],
+    );
+  }
 }
+
+
