@@ -7,12 +7,17 @@ enum Cover {
   comprehensive;
 
   // DONE: double get factor => switch (this) { ... 0.6 / 0.8 / 1.0 ... };
-  double get factor =>
-      switch (this) {
-        Cover.thirdParty => 0.6,
-        Cover.thirdPartyFireTheft => 0.8,
-        Cover.comprehensive => 1.0
-      };
+  double get factor => switch (this) {
+    Cover.thirdParty => 0.6,
+    Cover.thirdPartyFireTheft => 0.8,
+    Cover.comprehensive => 1.0,
+  };
+
+  String get label => switch (this) {
+    Cover.thirdParty => 'Third party',
+    Cover.thirdPartyFireTheft => 'Third party, fire & theft',
+    Cover.comprehensive => 'Comprehensive',
+  };
 }
 
 // ---------- 2. QuoteRequest ----------
@@ -25,16 +30,34 @@ class QuoteRequest {
   final int driverAge;
   final Cover cover;
 
-  const QuoteRequest({required this.make, this.model, required this.year, required this.driverAge, required this.cover});
+  const QuoteRequest({
+    required this.make,
+    this.model,
+    required this.year,
+    required this.driverAge,
+    required this.cover,
+  });
 
   // NOTE extra from slides
-  QuoteRequest copyWith({String? make, String? model, int? year, int? driverAge, Cover? cover}) =>
-      QuoteRequest(make: make ?? this.make, model: model ?? this.model, year: year ?? this.year,
-          driverAge: driverAge ?? this.driverAge, cover: cover ?? this.cover);
+  QuoteRequest copyWith({
+    String? make,
+    String? model,
+    int? year,
+    int? driverAge,
+    Cover? cover,
+  }) => QuoteRequest(
+    make: make ?? this.make,
+    model: model ?? this.model,
+    year: year ?? this.year,
+    driverAge: driverAge ?? this.driverAge,
+    cover: cover ?? this.cover,
+  );
 }
 
 // NOTE extra from slides
-extension Money on double { String get rands => 'R ${toStringAsFixed(2)}'; }
+extension Money on double {
+  String get rands => 'R ${toStringAsFixed(2)}';
+}
 
 // ---------- 3. Quote ----------
 // DONE: id (String), premium (double), currency defaulting to 'ZAR'
@@ -54,7 +77,11 @@ class Quote {
     currency: j['currency'] as String? ?? 'ZAR',
   );
 
-  Map<String, dynamic> toJson() => {'id': id, 'premium': premium, 'currency': currency};
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'premium': premium,
+    'currency': currency,
+  };
 }
 // ---------- 4. Premium calculation ----------
 // DONE: double calculatePremium(QuoteRequest r)
@@ -72,9 +99,11 @@ double calculatePremium(QuoteRequest r) {
 // ---------- 5. Sealed state ----------
 // DONE: sealed class QuoteState with Idle / Loading / Loaded(quote) / Failed(message)
 //       String describe(QuoteState s) using an exhaustive switch expression
-sealed class QuoteState {  // https://dart.dev/language/class-modifiers#sealed
+sealed class QuoteState {
+  // https://dart.dev/language/class-modifiers#sealed
   const QuoteState();
 }
+
 class QuoteIdle extends QuoteState {
   const QuoteIdle();
 }
@@ -149,6 +178,7 @@ Stream<QuoteState> quoteStates(QuoteService s, QuoteRequest r) async* {
     yield QuoteFailed(e.toString());
   }
 }
+
 // void main() async {
 //   // Lab 1
 //   // DONE: build three requests with copyWith, print each premium
