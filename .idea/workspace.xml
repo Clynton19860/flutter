@@ -6,6 +6,12 @@
   <component name="ChangeListManager">
     <list default="true" id="f16d19a9-c310-43bf-bb6f-16c2ba1d4a6b" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/quote_app/lib/app.dart" beforeDir="false" afterPath="$PROJECT_DIR$/quote_app/lib/app.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/quote_app/lib/features/quote/presentation/capture_form.dart" beforeDir="false" afterPath="$PROJECT_DIR$/quote_app/lib/features/quote/presentation/capture_form.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/quote_app/lib/features/quote/presentation/capture_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/quote_app/lib/features/quote/presentation/capture_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/quote_app/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/quote_app/lib/main.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/quote_app/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/quote_app/pubspec.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/quote_app/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/quote_app/pubspec.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,12 +35,14 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.cidr.known.project.marker": "true",
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "git-widget-placeholder": "nhlanhla",

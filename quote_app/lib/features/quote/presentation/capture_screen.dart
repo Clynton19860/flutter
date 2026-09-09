@@ -1,25 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:quote_app/core/theme/brand_theme.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
 import 'package:quote_app/features/quote/presentation/capture_form.dart';
 
 class CaptureScreen extends StatelessWidget {
-  const CaptureScreen({super.key});
+  const CaptureScreen({super.key, required this.brand, required this.onSwitchBrand});
+  final BrandTheme brand;
+  final VoidCallback onSwitchBrand;
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Get a quote')),
+    appBar: AppBar(
+      title: Text(brand.name),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.swap_horiz),
+          tooltip: 'Switch brand',
+          onPressed: onSwitchBrand,
+        ),
+      ],
+    ),
     body: SafeArea(
       child: LayoutBuilder(
         builder: (context, constraints) {
+          final header = _BrandHeader(name: brand.name, logoAsset: brand.logoAsset);
           final form = CaptureForm(onSubmit: (r) => _showPremium(context, r));
 
           if (constraints.maxWidth >= 700) {
             return Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(
+                SizedBox(
                   width: 280,
-                  child: Padding(padding: EdgeInsets.all(16), child: _BrandHeader()),
+                  child: Padding(padding: const EdgeInsets.all(16), child: header),
                 ),
                 Expanded(
                   child: SingleChildScrollView(padding: const EdgeInsets.all(16), child: form),
@@ -30,7 +43,7 @@ class CaptureScreen extends StatelessWidget {
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
-            child: Column(children: [const _BrandHeader(), const SizedBox(height: 16), form]),
+            child: Column(children: [header, const SizedBox(height: 16), form]),
           );
         },
       ),
@@ -44,39 +57,50 @@ class CaptureScreen extends StatelessWidget {
 }
 
 class _BrandHeader extends StatelessWidget {
-  const _BrandHeader();
+  const _BrandHeader({required this.name, required this.logoAsset});
+  final String name;
+  final String logoAsset;
 
   @override
-  Widget build(BuildContext context) => Stack(
-    clipBehavior: Clip.none,
-    children: [
-      Container(
-        height: 120,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary,
-          borderRadius: BorderRadius.circular(16),
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          height: 120,
+          decoration: BoxDecoration(color: cs.primary, borderRadius: BorderRadius.circular(16)),
         ),
-      ),
-      Positioned(
-        left: 16,
-        top: 16,
-        child: Text(
-          'Quote App',
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+        Positioned(
+          left: 16,
+          top: 16,
+          right: 16,
+          child: Row(
+            children: [
+              Image.asset(
+                logoAsset,
+                height: 28,
+                width: 28,
+                semanticLabel: '$name logo',
+                errorBuilder: (context, error, stackTrace) =>
+                    Icon(Icons.shield, size: 28, color: cs.onPrimary),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(name, style: tt.headlineSmall?.copyWith(color: cs.onPrimary)),
+              ),
+            ],
+          ),
         ),
-      ),
-      Positioned(
-        right: 16,
-        bottom: -14,
-        child: Chip(
-          label: const Text('Comprehensive'),
-          backgroundColor: Theme.of(context).colorScheme.surface,
+        Positioned(
+          right: 16,
+          bottom: -14,
+          child: Chip(label: const Text('Comprehensive'), backgroundColor: cs.surface),
         ),
-      ),
-    ],
-  );
+      ],
+    );
+  }
 }
 
 class PremiumBadge extends StatelessWidget {

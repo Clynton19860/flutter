@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
 
 class CaptureForm extends StatefulWidget {
@@ -16,6 +17,7 @@ class _CaptureFormState extends State<CaptureForm> {
   final _yearCtrl = TextEditingController();
   Cover _cover = Cover.comprehensive;
   DateTime? _licenceDate;
+  bool _autovalidate = false;
 
   @override
   void dispose() {
@@ -25,7 +27,10 @@ class _CaptureFormState extends State<CaptureForm> {
   }
 
   void _submit() {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      setState(() => _autovalidate = true);
+      return;
+    }
     final year = int.parse(_yearCtrl.text);
     final licenceYear = _licenceDate?.year ?? DateTime.now().year;
     final age = DateTime.now().year - licenceYear + 18;
@@ -56,7 +61,13 @@ class _CaptureFormState extends State<CaptureForm> {
   }
 
   @override
-  Widget build(BuildContext context) => Form(key: _formKey, child: _fields(context));
+  Widget build(BuildContext context) => Form(
+    key: _formKey,
+    autovalidateMode: _autovalidate
+        ? AutovalidateMode.onUserInteraction
+        : AutovalidateMode.disabled,
+    child: _fields(context),
+  );
 
   Widget _fields(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -87,11 +98,29 @@ class _CaptureFormState extends State<CaptureForm> {
         },
       ),
       const SizedBox(height: 12),
-      DropdownButtonFormField<Cover>(
+      FormField<Cover>(
         initialValue: _cover,
-        decoration: const InputDecoration(labelText: 'Cover'),
-        items: [for (final c in Cover.values) DropdownMenuItem(value: c, child: Text(c.label))],
-        onChanged: (c) => setState(() => _cover = c ?? _cover),
+        builder: (state) => InputDecorator(
+          decoration: InputDecoration(labelText: 'Cover', errorText: state.errorText),
+          child: GridView.count(
+            crossAxisCount: 3,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            children: [
+              for (final c in Cover.values)
+                _CoverCard(
+                  cover: c,
+                  selected: c == _cover,
+                  onTap: () {
+                    setState(() => _cover = c);
+                    state.didChange(c);
+                  },
+                ),
+            ],
+          ),
+        ),
       ),
       const SizedBox(height: 12),
       _LicenceDateField(value: _licenceDate, onChanged: (d) => setState(() => _licenceDate = d)),
@@ -114,9 +143,7 @@ class _LicenceDateField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final text = value == null
-        ? 'Select date'
-        : MaterialLocalizations.of(context).formatMediumDate(value!);
+    final text = value == null ? 'Select date' : DateFormat.yMMMd('en_ZA').format(value!);
     return FormField<DateTime>(
       initialValue: value,
       validator: (d) => d == null ? 'Licence date is required' : null,
@@ -141,6 +168,39 @@ class _LicenceDateField extends StatelessWidget {
             }
           },
           child: Text(text),
+        ),
+      ),
+    );
+  }
+}
+
+class _CoverCard extends StatelessWidget {
+  const _CoverCard({required this.cover, required this.selected, required this.onTap});
+  final Cover cover;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Card(
+      color: selected ? scheme.primaryContainer : null,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: selected ? scheme.primary : scheme.outlineVariant),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Text(
+              cover.label,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
         ),
       ),
     );
