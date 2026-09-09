@@ -2,8 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
 import 'package:quote_app/features/quote/presentation/capture_form.dart';
 
+import '../../../core/theme/brand_theme.dart';
+
 class CaptureScreen extends StatelessWidget {
-  const CaptureScreen({super.key});
+  const CaptureScreen({super.key, required this.brand, required this.onSwitchBrand});
+  final BrandTheme brand;
+  final VoidCallback onSwitchBrand;
+
+
 
   void _showPremium(BuildContext context, QuoteRequest r) {
     final premium = calculatePremium(r);
@@ -18,9 +24,24 @@ class CaptureScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(brand.name),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.swap_horiz),
+            tooltip: 'Switch brand',
+            onPressed: onSwitchBrand,
+          ),
+        ],
+      ),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
+            final header = _BrandHeader(
+              name: brand.name,
+              logoAsset: brand.logoAsset,
+            );
+
             // Mobile layout
             if (constraints.maxWidth < 700) {
               return SingleChildScrollView(
@@ -28,7 +49,7 @@ class CaptureScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const _BrandHeader(),
+                    header,
 
                     const SizedBox(height: 24),
 
@@ -49,9 +70,9 @@ class CaptureScreen extends StatelessWidget {
             return Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(
+                SizedBox(
                   width: 320,
-                  child: _BrandHeader(),
+                  child: header,
                 ),
 
                 const SizedBox(width: 24),
@@ -78,10 +99,29 @@ class CaptureScreen extends StatelessWidget {
   }
 }
 class _BrandHeader extends StatelessWidget {
-  const _BrandHeader();
+  const _BrandHeader({required this.name, required this.logoAsset});
+  final String name;
+  final String logoAsset;
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    Container(
+      color: cs.primaryContainer,
+      child: Row(
+        children: [
+          Image.asset(logoAsset, height: 28, semanticLabel: '$name logo'),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(name,
+                style: tt.titleLarge?.copyWith(color: cs.onPrimaryContainer)),
+          ),
+        ],
+      ),
+    )
+    ;
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -92,6 +132,8 @@ class _BrandHeader extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
           ),
         ),
+
+
         Positioned(
           left: 16, top: 16,
           child: Text('Alpha Insure',
@@ -110,4 +152,5 @@ class _BrandHeader extends StatelessWidget {
       ],
     );
   }
+
 }
