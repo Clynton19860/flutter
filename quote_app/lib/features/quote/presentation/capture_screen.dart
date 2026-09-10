@@ -142,22 +142,6 @@ class _BrandHeader extends StatelessWidget {
   }
 }
 
-// class FormArea extends StatelessWidget {
-//   const FormArea({super.key});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       height: 370,
-//       margin: const EdgeInsets.all(10),
-//       decoration: BoxDecoration(
-//         color: Theme.of(context).colorScheme.secondary,
-//         borderRadius: BorderRadius.circular(16),
-//       ),
-//     );
-//   }
-// }
-
 class PremiumBadge extends StatelessWidget {
   const PremiumBadge({super.key, required this.amount});
   final double amount;
