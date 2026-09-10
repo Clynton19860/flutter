@@ -1,12 +1,20 @@
 // ---------- 1. Cover ----------
 enum Cover {
-  thirdParty, thirdPartyFireTheft, comprehensive;
+  thirdParty,
+  thirdPartyFireTheft,
+  comprehensive;
 
   // TODO: double get factor => switch (this) { ... 0.6 / 0.8 / 1.0 ... };
-  double get factor => switch (this){
+  double get factor => switch (this) {
     Cover.thirdParty => 0.6,
     Cover.thirdPartyFireTheft => 0.8,
-    Cover.comprehensive => 1.0
+    Cover.comprehensive => 1.0,
+  };
+
+  String get label => switch (this) {
+    Cover.thirdParty => 'Third Party',
+    Cover.thirdPartyFireTheft => 'Third Party Fire & Theft',
+    Cover.comprehensive => 'Comprehensive',
   };
 }
 
@@ -22,11 +30,28 @@ class QuoteRequest {
   final int driverAge;
   final Cover cover;
 
-  const QuoteRequest({required this.make, this.model, required this.year, required this.driverAge, required this.cover});
+  const QuoteRequest({
+    required this.make,
+    this.model,
+    required this.year,
+    required this.driverAge,
+    required this.cover,
+  });
 
-  QuoteRequest copyWith({String? make, String? model, int? year, int? driverAge, Cover? cover}){
-    return QuoteRequest(make: make ?? this.make, model: model ?? this.model, year: year ?? this.year,
-        driverAge: driverAge ?? this.driverAge, cover: cover ?? this.cover);
+  QuoteRequest copyWith({
+    String? make,
+    String? model,
+    int? year,
+    int? driverAge,
+    Cover? cover,
+  }) {
+    return QuoteRequest(
+      make: make ?? this.make,
+      model: model ?? this.model,
+      year: year ?? this.year,
+      driverAge: driverAge ?? this.driverAge,
+      cover: cover ?? this.cover,
+    );
   }
 }
 
@@ -42,12 +67,19 @@ class Quote {
   Quote({required this.id, required this.premium, this.currency = 'ZAR'});
 
   String get display => '$id ${premium.toStringAsFixed(2)} $currency';
-  String get formattedDisplay => 'ID: $id\nPremium: ${premium.toStringAsFixed(2)}\nCurrency: $currency';
+  String get formattedDisplay =>
+      'ID: $id\nPremium: ${premium.toStringAsFixed(2)}\nCurrency: $currency';
 
-  factory Quote.fromJsom(Map<String, dynamic> q) => Quote(id: q['id'] as String, premium: (q['premium'] as num).toDouble(),
-      currency: q['currency'] as String);
-  Map<String, dynamic> toJson() => {'id': id, 'premium': premium, 'currency': currency};
-
+  factory Quote.fromJsom(Map<String, dynamic> q) => Quote(
+    id: q['id'] as String,
+    premium: (q['premium'] as num).toDouble(),
+    currency: q['currency'] as String,
+  );
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'premium': premium,
+    'currency': currency,
+  };
 }
 
 // ---------- 4. Premium calculation ----------
@@ -58,9 +90,9 @@ class Quote {
 double calculatePremium(QuoteRequest r) {
   const int base = 1000;
 
-  if(r.driverAge < 25){
+  if (r.driverAge < 25) {
     return base * 1.5;
-  } else if (r.year < 2015){
+  } else if (r.year < 2015) {
     return base * 1.2;
   }
 
@@ -71,29 +103,29 @@ double calculatePremium(QuoteRequest r) {
 // TODO: sealed class QuoteState with Idle / Loading / Loaded(quote) / Failed(message)
 //       String describe(QuoteState s) using an exhaustive switch expression
 
-String describe(QuoteState s) => switch(s.runtimeType){
+String describe(QuoteState s) => switch (s.runtimeType) {
   Idle => 'Fill in the form',
   Loading => 'Calculating...',
   Loaded => (s as Loaded).quote.display,
   Failed => 'Error: ${(s as Failed).message}',
-  _=> '???????? UNKNOWN STATE ????????'
+  _ => '???????? UNKNOWN STATE ????????',
 };
-sealed class QuoteState{
 
-}
-class Idle implements QuoteState{
-}
+sealed class QuoteState {}
 
-class Loading implements QuoteState{
+class Idle implements QuoteState {}
+
+class Loading implements QuoteState {
   const Loading();
 }
 
-class Loaded implements QuoteState{
+class Loaded implements QuoteState {
   final Quote quote;
 
   Loaded({required this.quote});
 }
-class Failed implements QuoteState{
+
+class Failed implements QuoteState {
   String? message;
 
   Failed({this.message = 'Something went wrong'});

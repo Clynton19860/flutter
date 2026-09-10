@@ -11,6 +11,6 @@ class QuoteApp extends StatelessWidget{
       colorSchemeSeed: const Color(0xFF0B2545),
       useMaterial3: true
     ),
-    home: const CaptureScreen(),
+    home: CaptureScreen(),
   );
 }
