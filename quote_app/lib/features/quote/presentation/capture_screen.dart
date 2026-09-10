@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:quote_app/core/theme/brand_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:quote_app/core/theme/brand_provider.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
 import 'package:quote_app/features/quote/presentation/capture_form.dart';
 
-class CaptureScreen extends StatelessWidget{
-  const CaptureScreen({super.key, required this.brand, required this.onSwitchBrand});
-  final BrandTheme brand;
-  final VoidCallback onSwitchBrand;
+class CaptureScreen extends ConsumerStatefulWidget{
+  const CaptureScreen({super.key});
 
+  @override
+  ConsumerState<CaptureScreen> createState() => _CaptureScreenState();
+}
+
+class _CaptureScreenState extends ConsumerState<CaptureScreen> {
   void _showPremium(BuildContext context, QuoteRequest r) {
     final premium = calculatePremium(r);
     ScaffoldMessenger.of(context).showSnackBar(
@@ -29,19 +33,19 @@ class CaptureScreen extends StatelessWidget{
   
     return Scaffold(
     appBar: AppBar(
-      title: Text(brand.name),
+      title: Text(ref.watch(brandProvider).name),
       centerTitle: true,
       actions: [
         IconButton(
           icon: const Icon(Icons.swap_horiz),
           tooltip: 'Switch brand',
-          onPressed: onSwitchBrand,
+          onPressed: () => ref.read(brandKeyProvider.notifier).toggle(),
         ),
       ],
     ),
     body: SafeArea(child: LayoutBuilder(builder: (context, constraints){
       final isScrollingColumn = constraints.maxWidth < 700;
-      final header = _BrandHeader(name: brand.name, logoAsset: brand.logoAsset);
+      const header = _BrandHeader();
 
       if(isScrollingColumn){
         return Scrollbar(
@@ -78,13 +82,14 @@ class CaptureScreen extends StatelessWidget{
 
 }
 
-class _BrandHeader extends StatelessWidget {
-  const _BrandHeader({required this.name, required this.logoAsset});
-  final String name;
-  final String logoAsset;
+class _BrandHeader extends ConsumerWidget {
+  const _BrandHeader();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final brand = ref.watch(brandProvider);
+    final name = brand.name;
+    final logoAsset = brand.logoAsset;
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     return Stack(
