@@ -4,6 +4,7 @@ import 'package:quote_app/features/quote/domain/quote_model.dart';
 import 'package:quote_app/features/quote/presentation/capture_form.dart';
 import 'package:quote_app/core/theme/brand_theme.dart';
 import 'package:quote_app/core/theme/brand_provider.dart';
+import 'package:quote_app/features/quote/presentation/premium_card.dart';
 import 'package:quote_app/features/quote/presentation/quote_providers.dart';
 
 class CaptureScreen extends ConsumerStatefulWidget {
@@ -56,17 +57,21 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
                   children: [
                     header,
                     const SizedBox(height: 24),
+
                     Card(
                       child: Padding(
-                        padding: const EdgeInsets.all(24),
+                        padding: const EdgeInsets.all(20),
                         child: CaptureForm(
+                          enabled: quoteState is! Loading,
                           onSubmit: (r) {
                             ref.read(quoteProvider.notifier).submit(r);
                           },
                         ),
                       ),
                     ),
+
                     const SizedBox(height: 16),
+
                     switch (quoteState) {
                       Idle() => const Text('Fill in the form'),
 
@@ -74,15 +79,7 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
                         child: CircularProgressIndicator(),
                       ),
 
-                      Loaded(:final quote) => Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Text(
-                            quote.display,
-                            style: Theme.of(context).textTheme.headlineSmall,
-                          ),
-                        ),
-                      ),
+                      Loaded(:final quote) => PremiumCard(quote: quote),
 
                       Failed(:final message) => Text(message),
                     },
@@ -96,6 +93,7 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(20),
                     child: CaptureForm(
+                      enabled: quoteState is! Loading,
                       onSubmit: (r) {
                         ref.read(quoteProvider.notifier).submit(r);
                       },
@@ -110,15 +108,7 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
 
                   Loading() => const Center(child: CircularProgressIndicator()),
 
-                  Loaded(:final quote) => Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Text(
-                        quote.display,
-                        style: Theme.of(context).textTheme.headlineSmall,
-                      ),
-                    ),
-                  ),
+                  Loaded(:final quote) => PremiumCard(quote: quote),
 
                   Failed(:final message) => Text(message),
                 },
