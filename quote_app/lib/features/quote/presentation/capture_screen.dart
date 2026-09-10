@@ -1,54 +1,61 @@
 import 'package:flutter/material.dart';
-import 'package:quote_app/core/theme/brand_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:quote_app/core/theme/brand_provider.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
 import 'package:quote_app/features/quote/presentation/capture_form.dart';
 
-class CaptureScreen extends StatelessWidget {
-  const CaptureScreen({super.key, required this.brand, required this.onSwitchBrand});
-  final BrandTheme brand;
-  final VoidCallback onSwitchBrand;
+class CaptureScreen extends ConsumerStatefulWidget {
+  const CaptureScreen({super.key});
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      title: Text(brand.name),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.swap_horiz),
-          tooltip: 'Switch brand',
-          onPressed: onSwitchBrand,
-        ),
-      ],
-    ),
-    body: SafeArea(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final header = _BrandHeader(name: brand.name, logoAsset: brand.logoAsset);
-          final form = CaptureForm(onSubmit: (r) => _showPremium(context, r));
+  ConsumerState<CaptureScreen> createState() => _CaptureScreenState();
+}
 
-          if (constraints.maxWidth >= 700) {
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: 280,
-                  child: Padding(padding: const EdgeInsets.all(16), child: header),
-                ),
-                Expanded(
-                  child: SingleChildScrollView(padding: const EdgeInsets.all(16), child: form),
-                ),
-              ],
-            );
-          }
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(children: [header, const SizedBox(height: 16), form]),
-          );
-        },
+class _CaptureScreenState extends ConsumerState<CaptureScreen> {
+  @override
+  Widget build(BuildContext context) {
+    final brand = ref.watch(brandProvider);
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(brand.name),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.swap_horiz),
+            tooltip: 'Switch brand',
+            onPressed: () => ref.read(brandKeyProvider.notifier).toggle(),
+          ),
+        ],
       ),
-    ),
-  );
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final header = const _BrandHeader();
+            final form = CaptureForm(onSubmit: (r) => _showPremium(context, r));
+
+            if (constraints.maxWidth >= 700) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 280,
+                    child: Padding(padding: const EdgeInsets.all(16), child: header),
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(padding: const EdgeInsets.all(16), child: form),
+                  ),
+                ],
+              );
+            }
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(children: [header, const SizedBox(height: 16), form]),
+            );
+          },
+        ),
+      ),
+    );
+  }
 
   void _showPremium(BuildContext context, QuoteRequest r) {
     final premium = calculatePremium(r);
@@ -56,13 +63,12 @@ class CaptureScreen extends StatelessWidget {
   }
 }
 
-class _BrandHeader extends StatelessWidget {
-  const _BrandHeader({required this.name, required this.logoAsset});
-  final String name;
-  final String logoAsset;
+class _BrandHeader extends ConsumerWidget {
+  const _BrandHeader();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final brand = ref.watch(brandProvider);
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     return Stack(
@@ -79,16 +85,16 @@ class _BrandHeader extends StatelessWidget {
           child: Row(
             children: [
               Image.asset(
-                logoAsset,
+                brand.logoAsset,
                 height: 28,
                 width: 28,
-                semanticLabel: '$name logo',
+                semanticLabel: '${brand.name} logo',
                 errorBuilder: (context, error, stackTrace) =>
                     Icon(Icons.shield, size: 28, color: cs.onPrimary),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: Text(name, style: tt.headlineSmall?.copyWith(color: cs.onPrimary)),
+                child: Text(brand.name, style: tt.headlineSmall?.copyWith(color: cs.onPrimary)),
               ),
             ],
           ),
