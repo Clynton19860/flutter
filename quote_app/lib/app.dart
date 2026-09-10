@@ -1,20 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:quote_app/core/theme/brand_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:quote_app/features/quote/presentation/capture_screen.dart';
 
-class QuoteApp extends StatefulWidget {
+import 'core/theme/brand_provider.dart';
+
+class QuoteApp extends ConsumerWidget {
   const QuoteApp({super.key});
 
   @override
-  State<QuoteApp> createState() => _QuoteAppState();
-}
-
-class _QuoteAppState extends State<QuoteApp> {
-  String _brandKey = 'alpha';
-
-  @override
-  Widget build(BuildContext context) {
-    final brand = brands[_brandKey]!;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final brand = ref.watch(brandProvider);
     return MaterialApp(
       title: brand.name,
       theme: brand.toThemeData(Brightness.light),
@@ -22,9 +17,7 @@ class _QuoteAppState extends State<QuoteApp> {
       themeMode: ThemeMode.system,
       home: CaptureScreen(
         brand: brand,
-        onSwitchBrand: () => setState(
-              () => _brandKey = _brandKey == 'alpha' ? 'beta' : 'alpha',
-        ),
+        onSwitchBrand: () => ref.read(brandKeyProvider.notifier).toggle(),
       ),
     );
   }
