@@ -4,3 +4,6 @@ quote_app/
 
 # PowerPoint lock files
 ~$*
+
+# macOS
+.DS_Store

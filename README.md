@@ -8,11 +8,12 @@ lab application.
 | Folder | What's in it |
 |---|---|
 | `handbooks/` | `Day1`–`Day5_Handbook.md`. The delegate handbook for each day. Open alongside the course and copy code straight out. |
+| `handbooks/Pocket_Guide.md` | **Keep this one.** Commands, keyboard shortcuts, every gotcha from the week with its fix, and installation through to Play Store / App Store release. |
 | `slides/` | The presenter deck for each day, `Day1`–`Day5`. Speaker notes are in each deck. |
 | `exercises/` | Eighteen find-the-bug exercises. 1–10 run in DartPad; 11–18 run in the app. |
 | `solutions/` | Worked answers to all eighteen exercises, plus the labs that were demonstrated rather than typed (1.2, 2.1, 3.1, 4.1, 4.2). Try it yourself first — then check. |
 | `dartpad/` | Ready-to-paste DartPad files for the Day 1 labs. |
-| `setup/` | `START_HERE` install guides and the VS Code config. Do this before Day 1. |
+| `setup/` | `START_HERE` install guides, the VS Code config, and `setup_ios_simulator.sh` for the iOS Simulator on macOS. Do this before Day 1. |
 | `handouts-pdf/` | PDF exports for printing and emailing. |
 
 ## The lab app
