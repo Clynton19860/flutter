@@ -95,12 +95,27 @@ An `.aab` (App Bundle), not an `.apk`. Play has not accepted APKs for new apps s
 Create the app, then complete **every** item under **App content**. This is the part that
 takes the time, and it is the part that is genuinely production work:
 
-- Privacy policy URL — a real, reachable page
-- Data safety — what you collect, why, whether it is shared
+- Privacy policy URL — a real, reachable page. Use the course one:
+  `https://clynton19860.github.io/flutter/privacy/`
+- Data safety — what you collect, why, whether it is shared (**read the note below**)
 - Content rating — the full questionnaire
 - Target audience and content
 - Ads declaration
 - Government apps / financial features / health declarations
+
+### Data safety — the one everybody gets wrong
+
+Google's definition of **collected** is *transmitted off the device*. It does
+not mean "typed into a form".
+
+This app has no server, makes no network calls, and declares no internet
+permission — `FakeQuoteService` computes the premium locally. So the honest
+answer is **"No data collected"**, even though the app obviously has a form in
+it. `shared_preferences` and `sqflite` are local storage and do not change that.
+
+> Over-declaring is not the safe option. Claiming you collect data you do not
+> collect is as wrong as hiding data you do. Answer what the code actually does
+> — and be ready to say why.
 
 And the **Store listing**:
 
