@@ -33,6 +33,15 @@ class PremiumCard extends StatelessWidget {
               'Quote ref ${quote.id}',
               style: tt.bodySmall?.copyWith(color: cs.onPrimaryContainer),
             ),
+            if (quote.breakdown case final breakdown?
+                when breakdown.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              for (final line in breakdown)
+                Text(
+                  '• $line',
+                  style: tt.bodySmall?.copyWith(color: cs.onPrimaryContainer),
+                ),
+            ],
           ],
         ),
       ),
