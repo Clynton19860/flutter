@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:quote_app/core/theme/brand_provider.dart';
 import 'package:quote_app/core/theme/brand_theme.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
 import 'package:quote_app/features/quote/presentation/capture_form.dart';
+import 'package:quote_app/features/quote/presentation/premium_card.dart';
+import 'package:quote_app/features/quote/presentation/quote_providers.dart';
 
 class CaptureScreen extends StatelessWidget {
   const CaptureScreen({super.key, required this.brand, required this.onSwitchBrand});
@@ -35,6 +39,7 @@ class CaptureScreen extends StatelessWidget {
             builder: (context, constraints) {
               final form = CaptureForm(
                 onSubmit: (r) => _showPremium(context, r),
+                enabled: true,
               );
               final header = _BrandHeader(name: brand.name, logoAsset: brand.logoAsset);
               if (constraints.maxWidth >= _wideBreakpoint) {
