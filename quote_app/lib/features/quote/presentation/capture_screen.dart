@@ -1,17 +1,28 @@
 import 'package:flutter/material.dart';
 import '../domain/quote_model.dart';
 import './capture_form.dart';
+import 'package:quote_app/core/theme/brand_theme.dart';
 
 const largeScreenMinWidth = 700;
 
 class CaptureScreen extends StatelessWidget {
-  const CaptureScreen({super.key});
+  const CaptureScreen({super.key, required this.brand, required this.onSwitchBrand});
+  final BrandTheme brand;
+  final VoidCallback onSwitchBrand;
+
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Get a quote'),
+        title: Text(brand.name),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.swap_horiz),
+            onPressed: onSwitchBrand,
+          ),
+        ],
       ),
       body: SafeArea(
         child: LayoutBuilder(
@@ -22,17 +33,32 @@ class CaptureScreen extends StatelessWidget {
             if (isLargeScreen) {
               return Row(
                 children: [
-                  const SizedBox(
+                  SizedBox(
                     width: 280,
-                    child: _BrandHeader(),
+                    child: _BrandHeader(
+                      name: brand.name,
+                      logoAsset: brand.logoAsset,
+                    ),
                   ),
                   Expanded(
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.all(16),
-                      child: const Card(
+                      child: Card(
                         child: Padding(
-                          padding: EdgeInsets.all(24),
-                          child:Text("data"),
+                          padding: const EdgeInsets.all(24),
+                          child: CaptureForm(
+                            onSubmit: (request) {
+                              final premium = calculatePremium(request);
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Premium: R ${premium.toStringAsFixed(2)}',
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ),
@@ -48,23 +74,29 @@ class CaptureScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
 
                   children: [
-                    const _BrandHeader(),
+                    _BrandHeader(
+                name: brand.name,
+                logoAsset: brand.logoAsset,
+                ),
                     const SizedBox(height: 24),
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(24),
-                        child: CaptureForm(
-                          onSubmit: (request) {
-                            final premium = calculatePremium(request);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Premium: R ${premium.toStringAsFixed(2)}'),
-                              ),
-                            );
-                          },
-                        )
-                      ),
-                    ),
+            Card(
+            child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: CaptureForm(
+            onSubmit: (request) {
+            final premium = calculatePremium(request);
+
+            ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+            content: Text(
+            'Premium: R ${premium.toStringAsFixed(2)}',
+            ),
+            ),
+            );
+            },
+            ),
+            ),
+            ),
                   ],
                 ),
               ),
@@ -80,7 +112,10 @@ class CaptureScreen extends StatelessWidget {
 
 
 class _BrandHeader extends StatelessWidget {
-  const _BrandHeader();
+  const _BrandHeader({required this.name, required this.logoAsset});
+
+  final String name;
+  final String logoAsset;
 
   @override
   Widget build(BuildContext context) =>
@@ -99,22 +134,26 @@ class _BrandHeader extends StatelessWidget {
           ),
           Positioned(
             left: 16, top: 16,
-            child: Text('Alpha Insure',
+            child: Text(name,
                 style: Theme
                     .of(context)
                     .textTheme
                     .titleLarge
-                    ?.copyWith(color: Colors.white)),
+                    ?.copyWith(color:Theme.of(context).colorScheme.onPrimary)),
           ),
           Positioned(
             right: 16, bottom: -20,
             child: Chip(label: const Text('Comprehensive'),
                 backgroundColor: Colors.white),
           ),
-          const Positioned.fill(
+          Positioned.fill(
             child: Align(
               alignment: Alignment.center,
-              child: Icon(Icons.shield, size: 48, color: Colors.white24),
+              child: Image.asset(
+                logoAsset,
+                width: 48,
+                height: 48,
+              ),
             ),
           ),
         ],
