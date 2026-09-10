@@ -3,8 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
 
 class CaptureForm extends StatefulWidget {
-  const CaptureForm({super.key, required this.onSubmit});
+  const CaptureForm({super.key, required this.onSubmit, this.enabled = true});
   final void Function(QuoteRequest) onSubmit;
+  final bool enabled;
 
   @override
   State<CaptureForm> createState() => _CaptureFormState();
@@ -25,6 +26,7 @@ class _CaptureFormState extends State<CaptureForm> {
   }
 
   void _submit() {
+    if (!widget.enabled) return;
     if (!_formKey.currentState!.validate()) return;
     final year = int.parse(_yearCtrl.text);
     final licenceYear = _licenceDate?.year ?? DateTime.now().year;
@@ -100,9 +102,15 @@ class _CaptureFormState extends State<CaptureForm> {
       ),
       const SizedBox(height: 24),
       FilledButton.icon(
-        onPressed: _submit,
-        icon: const Icon(Icons.calculate),
-        label: const Text('Get quote'),
+        onPressed: widget.enabled ? _submit : null,
+        icon: widget.enabled
+            ? const Icon(Icons.calculate)
+            : const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+        label: Text(widget.enabled ? 'Get quote' : 'Calculating...'),
       ),
     ],
   );

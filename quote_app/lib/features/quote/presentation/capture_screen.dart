@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:quote_app/core/theme/brand_provider.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
 import 'package:quote_app/features/quote/presentation/capture_form.dart';
+import 'package:quote_app/features/quote/presentation/premium_card.dart';
+import 'package:quote_app/features/quote/presentation/quote_providers.dart';
 
 class CaptureScreen extends ConsumerStatefulWidget{
   const CaptureScreen({super.key});
@@ -12,24 +14,45 @@ class CaptureScreen extends ConsumerStatefulWidget{
 }
 
 class _CaptureScreenState extends ConsumerState<CaptureScreen> {
-  void _showPremium(BuildContext context, QuoteRequest r) {
-    final premium = calculatePremium(r);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Premium ${premium.rands}')),
-    );
-  }
-
   Widget _formCard(BuildContext context, Widget form) {
     return Card(
       elevation: 3,
       color: Theme.of(context).colorScheme.surface,
-      child: Padding(padding: EdgeInsets.all(20), child: form,),
+      child: Padding(padding: EdgeInsets.all(20), child: form),
     );
   }
+  
+  // Widget _leftHandContainer(List<Widget>? children) => Stack(
+  //   children: [
+  //     Card(
+  //       elevation: 200,
+  //       shadowColor: Colors.amber,
+  //       color: Colors.amber,
+  //     ),
+  //   if(children != null && children.isNotEmpty) for(final child in children) child
+  //   ]
+  // );
 
   @override
   Widget build(BuildContext context) { 
-    final Widget form = CaptureForm(onSubmit: (r) => _showPremium(context, r));
+    final quoteState = ref.watch(quoteProvider);
+
+    ref.listen<QuoteState>(quoteProvider, (previous, next) {
+      if (next is Failed) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(next.message ?? 'Something went wrong')),
+        );
+      }
+    });
+
+    final Widget form = CaptureForm(
+      enabled: quoteState is! Loading,
+      onSubmit: (r) => ref.read(quoteProvider.notifier).submit(r),
+    );
+    final Widget? resultCard = switch (quoteState) {
+      Loaded(quote: final quote) => PremiumCard(quote: quote),
+      _ => null,
+    };
   
     return Scaffold(
     appBar: AppBar(
@@ -46,6 +69,9 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
     body: SafeArea(child: LayoutBuilder(builder: (context, constraints){
       final isScrollingColumn = constraints.maxWidth < 700;
       const header = _BrandHeader();
+      // const rowColumChildren = [
+      //   SizedBox(width: 450, child: header)
+      // ];
 
       if(isScrollingColumn){
         return Scrollbar(
@@ -59,6 +85,10 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
                   header,
                   SizedBox(height: 24),
                   _formCard(context, form),
+                  if (resultCard != null) ...[
+                    const SizedBox(height: 24),
+                    resultCard,
+                  ],
                   ]))),
         );
       }
@@ -66,13 +96,19 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Padding(
-                padding: const EdgeInsets.only(top: 20, bottom: 20, right: 20),
-                child: SizedBox(width: 400, child: header),
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    SizedBox(width: 400, child: header)
+                  ],
+                ),
               ),
-              Expanded(child: Scrollbar(
-                thumbVisibility: true,
-                child: SingleChildScrollView( padding: const EdgeInsets.all(20), child: _formCard(context, form)),
-              )),
+              Expanded(child: SingleChildScrollView( padding: const EdgeInsets.all(20), child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _formCard(context, form),
+                ],
+              ))),
             ],
           );
       
@@ -87,6 +123,8 @@ class _BrandHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final currentOrietation = MediaQuery.orientationOf(context);
+    final isLandscape = currentOrietation == Orientation.landscape;
     final brand = ref.watch(brandProvider);
     final name = brand.name;
     final logoAsset = brand.logoAsset;
@@ -114,7 +152,7 @@ class _BrandHeader extends ConsumerWidget {
           ),
         ),
         Positioned(
-          right: 16, top: null, bottom: -20,
+          right: 16, top: isLandscape ? 170: null, bottom: isLandscape? null : -20,
           child: Chip(label: const Text('Comprehensive'), backgroundColor: cs.surface),
         ),
         Positioned.fill(
