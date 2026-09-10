@@ -284,7 +284,7 @@ A manifest change needs a full stop and `flutter run`. Hot restart is not enough
 ### Steps
 
 1. `flutter pub add go_router`.
-2. Create `lib/core/storage/onboarding_provider.dart` with an in-memory `OnboardedNotifier` (this afternoon it moves to `shared_preferences` and nothing else changes).
+2. Create `lib/core/storage/prefs_providers.dart` with an in-memory `OnboardedNotifier` (this afternoon the same file gains `shared_preferences`; only `build()` and `complete()` change, and nothing that imports it moves).
 3. Create `lib/core/routing/router.dart` from Part 1.2.
 4. `app.dart` → `MaterialApp.router(routerConfig: ref.watch(routerProvider))`.
 5. Create `OnboardingScreen` (solution below). Confirm the redirect sends you there, and that after "Get started" you cannot get back to it.
@@ -293,9 +293,11 @@ A manifest change needs a full stop and `flutter run`. Hot restart is not enough
 8. Add the intent filter to `AndroidManifest.xml`. Stop the app and `flutter run` again — hot restart is not enough. Then `adb shell am start -a android.intent.action.VIEW -d "quoteapp:///quote/result/q-1"`.
 9. `flutter analyze` clean, then commit.
 
-### Solution: `lib/core/storage/onboarding_provider.dart`
+### Solution: `lib/core/storage/prefs_providers.dart`
 
 ```dart
+// lib/core/storage/prefs_providers.dart - the in-memory version.
+// Part 3.1 rewrites the two methods in place; the file name does not change.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class OnboardedNotifier extends Notifier<bool> {
@@ -708,7 +710,9 @@ final onboardedProvider =
 
 **`throw UnimplementedError()` in the base provider is deliberate.** Forgetting the override then fails loudly and immediately, instead of silently returning something wrong.
 
-Compare this class against Lab 4.1's version. Only `build()` and `complete()` changed. The router, the redirect and the onboarding screen are all untouched — and the flag now survives a restart.
+Compare this class against Lab 4.1's version. **Same file, same class name, same provider** — only `build()` and `complete()` changed. The router, the redirect and the onboarding screen are all untouched, and no import anywhere needs editing. The flag now survives a restart.
+
+If you named the Lab 4.1 file something else, rename it to `prefs_providers.dart` now and fix the two imports (`router.dart`, `onboarding_screen.dart`). Leaving a second copy of `onboardedProvider` behind is the one mistake that breaks this lab: the redirect watches one provider while `complete()` sets the other, so onboarding never finishes and the app loops back to `/onboarding`.
 
 **To see onboarding again while testing:** `adb shell pm clear <applicationId>`, or Settings → Apps → quote_app → Clear storage.
 
@@ -1020,6 +1024,7 @@ Two seams, and both earn their keep today: swapping the fake service for the rea
 | `Bad state: No element` | `firstWhere` with no `orElse` | `.where(...).firstOrNull` |
 | Saved list does not refresh | Forgot `invalidateSelf()` | Add it after the write |
 | Onboarding shows every launch | `setBool` not awaited, or wrong key | Await it; check the key |
+| Onboarding never completes, loops back to `/onboarding` | Two copies of `onboardedProvider` in different files | Keep one, in `prefs_providers.dart`; repoint both imports |
 | `MissingPluginException` on Chrome | sqflite is mobile-only | `InMemoryQuoteRepository` |
 
 ---
