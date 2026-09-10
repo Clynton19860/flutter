@@ -1,86 +1,107 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:quote_app/core/theme/brand_provider.dart';
-import 'package:quote_app/core/theme/brand_theme.dart';
+import 'package:quote_app/core/theme/brand_provider.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
 import 'package:quote_app/features/quote/presentation/capture_form.dart';
-// import 'package:quote_app/features/quote/presentation/premium_card.dart';
-// import 'package:quote_app/features/quote/presentation/quote_providers.dart';
+import 'package:quote_app/features/quote/presentation/premium_card.dart';
+import 'package:quote_app/features/quote/presentation/quote_providers.dart';
 
-class CaptureScreen extends StatelessWidget {
-  const CaptureScreen({super.key, required this.brand, required this.onSwitchBrand});
-
-  final BrandTheme brand;
-  final VoidCallback onSwitchBrand;
+class CaptureScreen extends ConsumerStatefulWidget {
+  const CaptureScreen({super.key});
 
   static const _wideBreakpoint = 700.0;
 
-  void _showPremium(BuildContext context, QuoteRequest r) {
-    final premium = calculatePremium(r);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Premium ${premium.rands}')),
-    );
-  }
-
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: Text(brand.name),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.swap_horiz),
-              tooltip: 'Switch brand',
-              onPressed: onSwitchBrand,
-            ),
-          ],
-        ),
-        body: SafeArea(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final form = CaptureForm(
-                onSubmit: (r) => _showPremium(context, r),
-                enabled: true,
-              );
-              final header = _BrandHeader(name: brand.name, logoAsset: brand.logoAsset);
-              if (constraints.maxWidth >= _wideBreakpoint) {
-                return Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(width: 280, child: header),
-                      const SizedBox(width: 24),
-                      Expanded(
-                        child: SingleChildScrollView(child: form),
-                      ),
-                    ],
-                  ),
-                );
-              }
-              return SingleChildScrollView(
+  ConsumerState<CaptureScreen> createState() => _CaptureScreenState();
+}
+
+class _CaptureScreenState extends ConsumerState<CaptureScreen> {
+  @override
+  Widget build(BuildContext context) {
+    final brand = ref.watch(brandProvider);
+    final state = ref.watch(quoteProvider);
+
+    ref.listen(quoteProvider, (prev, next) {
+      if (next is QuoteFailed) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(next.message)));
+      }
+    });
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(brand.name),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.swap_horiz),
+            tooltip: 'Switch brand',
+            onPressed: () => ref.read(brandKeyProvider.notifier).toggle(),
+          ),
+        ],
+      ),
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final form = Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                CaptureForm(
+                  enabled: state is! QuoteLoading,
+                  onSubmit: (r) => ref.read(quoteProvider.notifier).submit(r),
+                ),
+                const SizedBox(height: 16),
+                switch (state) {
+                  QuoteIdle() => const Text('Fill in the form to get a quote'),
+                  QuoteLoading() =>
+                    const Center(child: CircularProgressIndicator()),
+                  QuoteLoaded(:final quote) => PremiumCard(quote: quote),
+                  QuoteFailed(:final message) => Text(
+                      message,
+                      style:
+                          TextStyle(color: Theme.of(context).colorScheme.error),
+                    ),
+                },
+              ],
+            );
+            final header = const _BrandHeader();
+            if (constraints.maxWidth >= CaptureScreen._wideBreakpoint) {
+              return Padding(
                 padding: const EdgeInsets.all(16),
-                child: Column(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    header,
-                    const SizedBox(height: 32),
-                    form,
+                    SizedBox(width: 280, child: header),
+                    const SizedBox(width: 24),
+                    Expanded(
+                      child: SingleChildScrollView(child: form),
+                    ),
                   ],
                 ),
               );
-            },
-          ),
+            }
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  header,
+                  const SizedBox(height: 32),
+                  form,
+                ],
+              ),
+            );
+          },
         ),
-      );
+      ),
+    );
+  }
 }
 
-class _BrandHeader extends StatelessWidget {
-  const _BrandHeader({required this.name, required this.logoAsset});
-
-  final String name;
-  final String logoAsset;
+class _BrandHeader extends ConsumerWidget {
+  const _BrandHeader();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final brand = ref.watch(brandProvider);
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     return Stack(
@@ -98,11 +119,11 @@ class _BrandHeader extends StatelessWidget {
           top: 16,
           child: Row(
             children: [
-              Image.asset(logoAsset, height: 28, semanticLabel: '$name logo'),
+              Image.asset(brand.logoAsset, height: 28, semanticLabel: '${brand.name} logo'),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  name,
+                  brand.name,
                   style: tt.titleLarge?.copyWith(color: cs.onPrimaryContainer),
                 ),
               ),
