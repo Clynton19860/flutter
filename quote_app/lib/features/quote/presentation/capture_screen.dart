@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:quote_app/core/theme/brand_provider.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
 import 'package:quote_app/features/quote/presentation/capture_form.dart';
-import 'package:quote_app/features/quote/presentation/premium_card.dart';
 import 'package:quote_app/features/quote/presentation/quote_providers.dart';
 
 class CaptureScreen extends ConsumerStatefulWidget {
@@ -19,11 +19,17 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
     final brand = ref.watch(brandProvider);
     final state = ref.watch(quoteProvider);
 
+    // Side effects: navigation and snackbars. Never in the returned tree.
     ref.listen<QuoteState>(quoteProvider, (prev, next) {
-      if (next is QuoteFailed) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(next.message)));
+      switch (next) {
+        case QuoteLoaded(:final quote):
+          context.push('/quote/result/${quote.id}');
+        case QuoteFailed(:final message):
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(message)));
+        default:
+          break;
       }
     });
 
@@ -56,7 +62,7 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
                   QuoteLoading() => const Center(
                     child: CircularProgressIndicator(),
                   ),
-                  QuoteLoaded(:final quote) => PremiumCard(quote: quote),
+                  QuoteLoaded() => const Text('Opening your quote...'),
                   QuoteFailed(:final message) => Text(
                     message,
                     style: TextStyle(
