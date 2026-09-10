@@ -15,7 +15,7 @@ void main() {
   print(nickname?.length);      // null
   print(nickname ?? 'none');    // 'none'
   nickname ??= 'S';             // assign only if null
-  print(nickname!.length);      // ! = "trust me, not null", throws if wrong
+  print(nickname.length);      // ! = "trust me, not null", throws if wrong
 
   String? maybe = DateTime.now().hour > 0 ? 'value' : null;
   if (maybe != null) {
