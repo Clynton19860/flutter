@@ -17,7 +17,10 @@ class BrandTheme {
   final String? fontFamily;
 
   ThemeData toThemeData(Brightness brightness) {
-    final scheme = ColorScheme.fromSeed(seedColor: seed, brightness: brightness);
+    final scheme = ColorScheme.fromSeed(
+      seedColor: seed,
+      brightness: brightness,
+    );
     return ThemeData(
       colorScheme: scheme,
       useMaterial3: true,
@@ -26,7 +29,27 @@ class BrandTheme {
         backgroundColor: scheme.primary,
         foregroundColor: scheme.onPrimary,
       ),
-      inputDecorationTheme: const InputDecorationThemeData(border: OutlineInputBorder()),
+      inputDecorationTheme: InputDecorationThemeData(
+        filled: true,
+        fillColor: scheme.surfaceContainerHighest,
+
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: scheme.outline, width: 1.5),
+        ),
+
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: scheme.primary, width: 2),
+        ),
+
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
+      ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
       ),
@@ -34,18 +57,17 @@ class BrandTheme {
   }
 }
 
-
 const brands = <String, BrandTheme>{
   'alpha': BrandTheme(
     key: 'alpha',
     name: 'Alpha Insure',
-    seed: Color(0xFF0B2545),
+    seed: Color.fromARGB(255, 78, 123, 143),
     logoAsset: 'assets/brands/alpha.png',
   ),
   'beta': BrandTheme(
     key: 'beta',
     name: 'Beta Cover',
-    seed: Color(0xFF8B1E3F),
+    seed: Color.fromARGB(255, 235, 193, 238),
     logoAsset: 'assets/brands/beta.png',
   ),
 };

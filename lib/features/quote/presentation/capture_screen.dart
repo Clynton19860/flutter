@@ -22,12 +22,9 @@ class CaptureScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-final tt = Theme.of(context).textTheme;
-    final header = _BrandHeader(
-  name: brand.name,
-  logoAsset: brand.logoAsset,
-);
-  return Scaffold(
+    final tt = Theme.of(context).textTheme;
+    final header = _BrandHeader(name: brand.name, logoAsset: brand.logoAsset);
+    return Scaffold(
       appBar: AppBar(
         title: Text(brand.name),
         actions: [
@@ -44,13 +41,15 @@ final tt = Theme.of(context).textTheme;
           builder: (context, constraints) {
             if (constraints.maxWidth < 700) {
               return SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     header,
-                    SizedBox(height: 16),
+                    const SizedBox(height: 24),
                     Card(
                       child: Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(24),
                         child: CaptureForm(
                           onSubmit: (r) => _showPremium(context, r),
                         ),
@@ -62,17 +61,20 @@ final tt = Theme.of(context).textTheme;
             }
             return Row(
               children: [
-                SizedBox(
-                  width: 300, 
-                  child: header
-                  ),
+                SizedBox(width: 300, child: header),
                 Expanded(
                   child: SingleChildScrollView(
                     child: Card(
                       child: Padding(
-                        padding: EdgeInsets.all(16),
-                        child: CaptureForm(
-                          onSubmit: (r) => _showPremium(context, r),
+                        padding: const EdgeInsets.all(16),
+                        child: Card(
+                          elevation: 3,
+                          child: Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: CaptureForm(
+                              onSubmit: (r) => _showPremium(context, r),
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -88,10 +90,7 @@ final tt = Theme.of(context).textTheme;
 }
 
 class _BrandHeader extends StatelessWidget {
-  const _BrandHeader({
-    required this.name,
-    required this.logoAsset,
-  });
+  const _BrandHeader({required this.name, required this.logoAsset});
 
   final String name;
   final String logoAsset;
@@ -112,25 +111,18 @@ class _BrandHeader extends StatelessWidget {
           left: 16,
           top: 16,
           child: Row(
-  children: [
-    Image.asset(
-      logoAsset,
-      height: 28,
-      semanticLabel: '$name logo',
-    ),
-    const SizedBox(width: 8),
-    Expanded(
-      child: Text(
-        name,
-        style: Theme.of(context)
-            .textTheme
-            .titleLarge
-            ?.copyWith(color: Colors.white),
-      ),
-    ),
-  ],
-),
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(logoAsset, height: 28, semanticLabel: '$name logo'),
+              const SizedBox(width: 8),
+              Text(
+                'Insurance made Simple',
+                style: Theme.of(context).textTheme.titleLarge
+                    ?.copyWith(color: Colors.white),
+              ),
+            ],
           ),
+        ),
         Positioned(
           right: 16,
           bottom: -20,
@@ -142,7 +134,11 @@ class _BrandHeader extends StatelessWidget {
         const Positioned.fill(
           child: Align(
             alignment: Alignment.center,
-            child: Icon(Icons.shield, size: 48, color: Colors.white24),
+            child: Icon(
+              Icons.verified_outlined,
+              size: 56,
+              color: Colors.white24,
+            ),
           ),
         ),
       ],

@@ -16,6 +16,7 @@ class _QuoteAppState extends State<QuoteApp> {
   Widget build(BuildContext context) {
     final brand = brands[_brandKey]!;
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: brand.name,
       theme: brand.toThemeData(Brightness.light),
       darkTheme: brand.toThemeData(Brightness.dark),

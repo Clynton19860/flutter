@@ -37,12 +37,60 @@ class _CaptureFormState extends State<CaptureForm> {
     ));
   }
 
+  Future<void> _reset() async {
+  final hasData =
+      _makeCtrl.text.isNotEmpty ||
+      _yearCtrl.text.isNotEmpty ||
+      _licenceDate != null;
+
+  if (hasData) {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Discard changes?'),
+        content: const Text(
+          'Your unsaved quote will be lost.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Discard'),
+          ),
+        ],
+      ),
+    );
+
+    if (!context.mounted) return;
+
+    if (confirmed != true) return;
+  }
+
+  _formKey.currentState!.reset();
+
+  _makeCtrl.clear();
+  _yearCtrl.clear();
+
+  setState(() {
+    _cover = Cover.comprehensive;
+    _licenceDate = null;
+  });
+}
+
   @override
   Widget build(BuildContext context) => Form(key: _formKey, child: _fields(context));
 
   Widget _fields(BuildContext context) => Column(
   crossAxisAlignment: CrossAxisAlignment.stretch,
   children: [
+    Text(
+  'Quote Details',
+  style: Theme.of(context).textTheme.headlineSmall,
+),
+const SizedBox(height: 20),
     TextFormField(
       controller: _makeCtrl,
       decoration: const InputDecoration(labelText: 'Vehicle make', hintText: 'e.g. VW'),
@@ -88,9 +136,16 @@ class _CaptureFormState extends State<CaptureForm> {
       icon: const Icon(Icons.calculate),
       label: const Text('Get quote'),
     ),
+    const SizedBox(height: 12),
+    OutlinedButton(
+  onPressed: _reset,
+  child: const Text('Reset'),
+),
   ],
 );
 }
+
+
 
 class _LicenceDateField extends StatelessWidget {
   const _LicenceDateField({required this.value, required this.onChanged});
