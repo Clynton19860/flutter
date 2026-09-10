@@ -1,57 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:quote_app/core/theme/brand_theme.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
 import 'package:quote_app/features/quote/presentation/capture_form.dart';
 
 class CaptureScreen extends StatelessWidget{
-  final Cover _cover = Cover.comprehensive;
-  double? _premium;
+  const CaptureScreen({super.key, required this.brand, required this.onSwitchBrand});
+  final BrandTheme brand;
+  final VoidCallback onSwitchBrand;
 
-  CaptureScreen({super.key});
-
-  void _calculate(){
-    final request = QuoteRequest(make: 'VW', year: 2020, driverAge: 30, cover: _cover);
-    _premium = calculatePremium(request);
+  void _showPremium(BuildContext context, QuoteRequest r) {
+    final premium = calculatePremium(r);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Premium ${premium.rands}')),
+    );
   }
-  QuoteRequest get request => QuoteRequest(make: 'VW', year: 2020, driverAge: 30, cover: _cover);
-  
-  Widget _brandHeader(BuildContext context, bool isLandscape) => Stack(
-    clipBehavior: Clip.none,
-    children: [
-      Container(
-        height: 200,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary,
-          borderRadius: BorderRadius.circular(16),
-        ),
-      ),
-      Positioned(
-        left: 16, top: 16,
-        child: Text('Alpha Insure',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white)),
-      ),
-      Positioned(
-        right: 16, top: isLandscape ? 170: null, bottom: isLandscape ? null : -20,
-        child: Chip(label: const Text('Comprehensive'), backgroundColor: Colors.white),
-      ),
-      const Positioned.fill(
-        child: Align(
-          alignment: Alignment.center,
-          child: Icon(Icons.shield, size: 48, color: Colors.white24),
-        ),
-      ),
-    ],
-  );
+
+  Widget _formCard(BuildContext context, Widget form) {
+    return Card(
+      elevation: 3,
+      color: Theme.of(context).colorScheme.surface,
+      child: Padding(padding: EdgeInsets.all(20), child: form,),
+    );
+  }
 
   @override
   Widget build(BuildContext context) { 
-    final Widget form = CaptureForm(onSubmit: (request) {
-    _calculate();
-  });
+    final Widget form = CaptureForm(onSubmit: (r) => _showPremium(context, r));
   
     return Scaffold(
-    appBar: AppBar(title: const Text('Get a quote', style: TextStyle(color: Colors.white),), centerTitle: true, backgroundColor: Theme.of(context).colorScheme.primary),
+    appBar: AppBar(
+      title: Text(brand.name),
+      centerTitle: true,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.swap_horiz),
+          tooltip: 'Switch brand',
+          onPressed: onSwitchBrand,
+        ),
+      ],
+    ),
     body: SafeArea(child: LayoutBuilder(builder: (context, constraints){
       final isScrollingColumn = constraints.maxWidth < 700;
+      final header = _BrandHeader(name: brand.name, logoAsset: brand.logoAsset);
 
       if(isScrollingColumn){
         return Scrollbar(
@@ -62,11 +52,9 @@ class CaptureScreen extends StatelessWidget{
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  _brandHeader(context, false),
+                  header,
                   SizedBox(height: 24),
-                  form,
-                  const SizedBox(height: 24),
-                  if (_premium != null) PremiumBadge(amount: _premium!),
+                  _formCard(context, form),
                   ]))),
         );
       }
@@ -75,14 +63,12 @@ class CaptureScreen extends StatelessWidget{
             children: [
               Padding(
                 padding: const EdgeInsets.only(top: 20, bottom: 20, right: 20),
-                child: SizedBox(width: 400, child: _brandHeader(context, true)),
+                child: SizedBox(width: 400, child: header),
               ),
               Expanded(child: Scrollbar(
                 thumbVisibility: true,
-                child: SingleChildScrollView( padding: const EdgeInsets.all(20), child: form),
+                child: SingleChildScrollView( padding: const EdgeInsets.all(20), child: _formCard(context, form)),
               )),
-              const SizedBox(height: 24),
-              if (_premium != null) PremiumBadge(amount: _premium!),
             ],
           );
       
@@ -90,6 +76,51 @@ class CaptureScreen extends StatelessWidget{
   );
   }
 
+}
+
+class _BrandHeader extends StatelessWidget {
+  const _BrandHeader({required this.name, required this.logoAsset});
+  final String name;
+  final String logoAsset;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          height: 200,
+          decoration: BoxDecoration(
+            color: cs.primary,
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        Positioned(
+          left: 16, top: 16,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(logoAsset, height: 28, semanticLabel: '$name logo'),
+              const SizedBox(width: 8),
+              Text(name, style: tt.titleLarge?.copyWith(color: cs.onPrimary)),
+            ],
+          ),
+        ),
+        Positioned(
+          right: 16, top: null, bottom: -20,
+          child: Chip(label: const Text('Comprehensive'), backgroundColor: cs.surface),
+        ),
+        Positioned.fill(
+          child: Align(
+            alignment: Alignment.center,
+            child: Icon(Icons.shield, size: 48, color: Colors.white24),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 class PremiumBadge extends StatelessWidget{
