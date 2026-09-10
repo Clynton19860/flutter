@@ -43,3 +43,22 @@ behind. Keep `onboardedProvider` declared in exactly one place.
 ---
 
 Solution: `solutions/exercise_17.dart`
+
+## Answer
+
+```dart
+// lib/core/routing/router.dart
+import 'package:quote_app/core/storage/prefs_providers.dart';
+
+final routerProvider = Provider<GoRouter>((ref) {
+  final onboarded = ref.watch(onboardedProvider);
+  ...
+});
+```
+
+```dart
+// lib/features/onboarding/presentation/onboarding_screen.dart
+import 'package:quote_app/core/storage/prefs_providers.dart';
+
+onPressed: () => ref.read(onboardedProvider.notifier).complete(),
+```

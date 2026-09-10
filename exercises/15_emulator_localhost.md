@@ -38,3 +38,12 @@ sends people hunting for a firewall.
 ---
 
 Solution: `solutions/exercise_15.dart`
+
+## ANSWER
+
+```dart
+const apiBaseUrl = String.fromEnvironment(
+  'API_URL',
+  defaultValue: 'http://10.0.2.2:8080',  
+);
+```

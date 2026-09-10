@@ -42,3 +42,16 @@ crash your delegates find and a crash a customer finds.
 ---
 
 Solution: `solutions/exercise_18.dart`
+
+## Answer
+
+```dart
+onPressed: () async {
+  await ref.read(savedQuotesProvider.notifier).add(quote);
+  if (!context.mounted) return;                 // <-- guard after the await
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text('Quote saved')),
+  );
+  context.go('/saved');
+}
+```

@@ -44,3 +44,21 @@ The fix is one annotation — and remember to re-run
 ---
 
 Solution: `solutions/exercise_16.dart`
+
+## Answer
+
+```dart
+@JsonSerializable()
+class Quote {
+  const Quote({required this.id, required this.premium, this.breakdown});
+
+  final String id;
+  final double premium;
+
+  @JsonKey(name: 'breakdown_lines')
+  final List<String>? breakdown;
+
+  factory Quote.fromJson(Map<String, dynamic> json) => _$QuoteFromJson(json);
+  Map<String, dynamic> toJson() => $QuoteToJson(this);
+}
+```

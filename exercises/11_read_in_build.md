@@ -35,3 +35,17 @@ it is worth adding. Get in the habit: **watch in build, read in callbacks.**
 ---
 
 Solution: `solutions/exercise_11.dart`
+
+## ANSWER
+
+```dart
+class BrandTitle extends ConsumerWidget {
+  const BrandTitle({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final brand = ref.watch(brandProvider);      // <-- here
+    return Text(brand.name);
+  }
+}
+```

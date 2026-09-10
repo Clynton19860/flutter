@@ -38,3 +38,21 @@ it and it still fails" only reloaded.
 ---
 
 Solution: `solutions/exercise_13.dart`
+
+## Answer
+
+```dart
+void main() {
+  runApp(const ProviderScope(child: QuoteApp()));
+}
+
+class QuoteApp extends ConsumerWidget {
+  const QuoteApp({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final brand = ref.watch(brandProvider);
+    return MaterialApp(title: brand.name, home: const CaptureScreen());
+  }
+}
+```

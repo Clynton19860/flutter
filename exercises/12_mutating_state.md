@@ -38,3 +38,21 @@ correctly concludes nothing happened.
 ---
 
 Solution: `solutions/exercise_12.dart`
+
+## Answer
+
+```dart
+class SavedNotifier extends Notifier<List<Quote>> {
+  @override
+  List<Quote> build() => [];
+
+  void add(Quote q) {
+  //  state.add(q);
+    state = [...state, q];                
+  }
+
+  void remove(String id) {
+    state = state.where((q) => q.id != id).toList();
+  }
+}
+```

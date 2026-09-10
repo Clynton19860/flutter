@@ -32,3 +32,12 @@ for adding it to the project on Day 5.
 ---
 
 Solution: `solutions/exercise_14.dart`
+
+## Answer
+
+```dart
+IconButton(
+  icon: const Icon(Icons.swap_horiz),
+  onPressed: () => ref.read(brandKeyProvider.notifier).toggle();  // refactor onPressed
+)
+```

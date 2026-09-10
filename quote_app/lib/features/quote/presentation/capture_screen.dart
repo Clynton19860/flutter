@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:quote_app/core/theme/brand_provider.dart';
+// import 'package:quote_app/core/theme/brand_provider.dart';
 import 'package:quote_app/core/theme/brand_theme.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
 import 'package:quote_app/features/quote/presentation/capture_form.dart';
-import 'package:quote_app/features/quote/presentation/premium_card.dart';
-import 'package:quote_app/features/quote/presentation/quote_providers.dart';
+// import 'package:quote_app/features/quote/presentation/premium_card.dart';
+// import 'package:quote_app/features/quote/presentation/quote_providers.dart';
 
 class CaptureScreen extends StatelessWidget {
   const CaptureScreen({super.key, required this.brand, required this.onSwitchBrand});
