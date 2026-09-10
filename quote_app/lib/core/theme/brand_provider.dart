@@ -1,0 +1,29 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'brand_theme.dart';
+
+class BrandKeyNotifier extends Notifier<String> {
+  @override
+  String build() => 'alpha';
+
+  void set(String key) => state = key;
+  void toggle() {
+    switch (state) {
+      case 'alpha':
+        state = 'beta';
+        break;
+      case 'beta':
+        state = 'gamma';
+        break;
+      case 'gamma':
+        state = 'alpha';
+        break;
+    }
+  }
+}
+
+final brandKeyProvider = NotifierProvider<BrandKeyNotifier, String>(BrandKeyNotifier.new);
+
+final brandProvider = Provider<BrandTheme>((ref) {
+  final key = ref.watch(brandKeyProvider);
+  return brands[key] ?? brands['alpha']!;
+});
