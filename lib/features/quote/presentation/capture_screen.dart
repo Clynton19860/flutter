@@ -1,29 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
 import 'package:quote_app/features/quote/presentation/capture_form.dart';
 import 'package:quote_app/core/theme/brand_theme.dart';
+import 'package:quote_app/core/theme/brand_provider.dart';
+import 'package:quote_app/features/quote/presentation/quote_providers.dart';
 
-class CaptureScreen extends StatelessWidget {
-  const CaptureScreen({
-    super.key,
-    required this.brand,
-    required this.onSwitchBrand,
-  });
+class CaptureScreen extends ConsumerStatefulWidget {
+  const CaptureScreen({super.key});
 
-  final BrandTheme brand;
-  final VoidCallback onSwitchBrand;
-  void _showPremium(BuildContext context, QuoteRequest r) {
-    final premium = calculatePremium(r);
+  @override
+  ConsumerState<CaptureScreen> createState() => _CaptureScreenState();
+}
 
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('Premium ${premium.rands}')));
-  }
+// final BrandTheme brand;
+// final VoidCallback onSwitchBrand;
 
+class _CaptureScreenState extends ConsumerState<CaptureScreen> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
-    final header = _BrandHeader(name: brand.name, logoAsset: brand.logoAsset);
+    final brand = ref.watch(brandProvider);
+    final quoteState = ref.watch(quoteProvider);
+
+    ref.listen<QuoteState>(quoteProvider, (previous, next) {
+      if (next is Failed) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(next.message)));
+      }
+    });
+    const header = _BrandHeader();
     return Scaffold(
       appBar: AppBar(
         title: Text(brand.name),
@@ -31,7 +38,9 @@ class CaptureScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.swap_horiz),
             tooltip: 'Switch brand',
-            onPressed: onSwitchBrand,
+            onPressed: () {
+              ref.read(brandKeyProvider.notifier).toggle();
+            },
           ),
         ],
       ),
@@ -51,35 +60,68 @@ class CaptureScreen extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.all(24),
                         child: CaptureForm(
-                          onSubmit: (r) => _showPremium(context, r),
+                          onSubmit: (r) {
+                            ref.read(quoteProvider.notifier).submit(r);
+                          },
                         ),
                       ),
                     ),
+                    const SizedBox(height: 16),
+                    switch (quoteState) {
+                      Idle() => const Text('Fill in the form'),
+
+                      Loading() => const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+
+                      Loaded(:final quote) => Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Text(
+                            quote.display,
+                            style: Theme.of(context).textTheme.headlineSmall,
+                          ),
+                        ),
+                      ),
+
+                      Failed(:final message) => Text(message),
+                    },
                   ],
                 ),
               );
             }
-            return Row(
+            return Column(
               children: [
-                SizedBox(width: 300, child: header),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Card(
-                          elevation: 3,
-                          child: Padding(
-                            padding: const EdgeInsets.all(20),
-                            child: CaptureForm(
-                              onSubmit: (r) => _showPremium(context, r),
-                            ),
-                          ),
-                        ),
-                      ),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: CaptureForm(
+                      onSubmit: (r) {
+                        ref.read(quoteProvider.notifier).submit(r);
+                      },
                     ),
                   ),
                 ),
+
+                const SizedBox(height: 16),
+
+                switch (quoteState) {
+                  Idle() => const Text('Fill in the form'),
+
+                  Loading() => const Center(child: CircularProgressIndicator()),
+
+                  Loaded(:final quote) => Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(
+                        quote.display,
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                    ),
+                  ),
+
+                  Failed(:final message) => Text(message),
+                },
               ],
             );
           },
@@ -89,14 +131,12 @@ class CaptureScreen extends StatelessWidget {
   }
 }
 
-class _BrandHeader extends StatelessWidget {
-  const _BrandHeader({required this.name, required this.logoAsset});
-
-  final String name;
-  final String logoAsset;
+class _BrandHeader extends ConsumerWidget {
+  const _BrandHeader({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final brand = ref.watch(brandProvider);
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -113,7 +153,11 @@ class _BrandHeader extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Image.asset(logoAsset, height: 28, semanticLabel: '$name logo'),
+              Image.asset(
+                brand.logoAsset,
+                height: 28,
+                semanticLabel: '${brand.name} logo',
+              ),
               const SizedBox(width: 8),
               Text(
                 'Insurance made Simple',
