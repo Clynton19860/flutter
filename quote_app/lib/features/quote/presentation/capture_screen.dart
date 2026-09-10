@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../domain/quote_model.dart';
+import 'capture_form.dart';
+
 class CaptureScreen extends StatelessWidget {
   const CaptureScreen({super.key});
 
@@ -13,8 +16,16 @@ class CaptureScreen extends StatelessWidget {
             return SingleChildScrollView(
               child: Column(
                 children: [
-                  _BrandHeader(),
-                  FormArea(),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 24),
+                    child: _BrandHeader(),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: CaptureForm(
+                      onSubmit: (request) => _showPremium(context, request),
+                    ),
+                  ),
                 ],
               ),
             );
@@ -22,21 +33,34 @@ class CaptureScreen extends StatelessWidget {
 
           return Row(
             children: [
-              SizedBox(
-                width: 320,
-                  child: _BrandHeader(),
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: FormArea(),
+              SizedBox(width: 320, child: const _BrandHeader()),
+              Expanded(child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: CaptureForm(
+                    onSubmit: (request) => _showPremium(context, request),
+                  ),
                 ),
-              ),
+              )),
             ],
           );
-        }
+        },
       ),
     ),
   );
+
+  void _showPremium(
+      BuildContext context,
+      QuoteRequest request,
+      ) {
+    final premium = calculatePremium(request);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Premium ${premium.rands}'),
+      ),
+    );
+  }
 }
 
 class _BrandHeader extends StatelessWidget {
@@ -68,7 +92,7 @@ class _BrandHeader extends StatelessWidget {
 
       Positioned(
         right: 16,
-        bottom: 20,
+        bottom: -20,
         child: Chip(
           label: const Text('Comprehensive'),
           backgroundColor: Colors.white,
