@@ -1,0 +1,6 @@
+# The materials repo has no pubspec. The Dart files here are standalone
+# teaching snippets, not a package - they are pasted into DartPad.
+analyzer:
+  exclude:
+    - solutions/**      # worked answers; some intentionally show the bug first
+    - dartpad/**        # DartPad snippets; some warn on purpose (null-safety demo)
