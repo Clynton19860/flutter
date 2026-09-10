@@ -1,54 +1,283 @@
-# MO Integrations · Flutter Mobile Application Development
+# Flutter Day 1: Delegate Handbook
 
-Five-day technical training. Delegate handbooks, slides, exercises and the
-lab application.
+**Foundations & Dart** · MO Integrations · Flutter Mobile Application Development
 
-## What is where
+> **How to use this document.** Open it in VS Code (or any editor) alongside the course so you can copy blocks straight out of it. Every code block is complete and runnable as it stands. Nothing is a fragment. Windows commands come first because that is what the room runs; macOS follows each one.
+>
+> **Course project:** `quote_app`, a white-label motor-insurance quoting app. Everything you build today is used again on Days 2-5. Nothing is throwaway.
 
-| Folder | What's in it |
+---
+
+## Part 0 · Before we start
+
+| You need | Notes |
 |---|---|
-| `handbooks/` | `Day1`–`Day5_Handbook.md`. The delegate handbook for each day. Open alongside the course and copy code straight out. |
-| `slides/` | The presenter deck for each day, `Day1`–`Day5`. Speaker notes are in each deck. |
-| `exercises/` | Eighteen find-the-bug exercises. 1–10 run in DartPad; 11–18 run in the app. |
-| `solutions/` | Worked answers to all eighteen exercises, plus the labs that were demonstrated rather than typed (1.2, 2.1, 3.1, 4.1, 4.2). Try it yourself first — then check. |
-| `dartpad/` | Ready-to-paste DartPad files for the Day 1 labs. |
-| `setup/` | `START_HERE` install guides and the VS Code config. Do this before Day 1. |
-| `handouts-pdf/` | PDF exports for printing and emailing. |
+| Windows 10/11 (or macOS) | 16 GB RAM recommended, 8 GB minimum, 30 GB free disk |
+| Flutter SDK, stable channel | Part 1 below |
+| Android Studio | For the Android SDK and the emulator, even though we code in VS Code |
+| VS Code + Flutter extension | Our editor for the week |
+| An Android emulator **or** a physical Android phone | Either is fine |
+| A browser | dartpad.dev for Labs 1.2 and 1.3. No install needed |
 
-## The lab app
+**If your install is not finished, do not panic.** Labs 1.2 and 1.3 run entirely in the browser. You can catch up on the SDK during those labs.
 
-The app is **not in this branch.** It lives on the `lab-*` branches:
+### Do this before you arrive, if you possibly can
 
-```
-lab-3-start        End of Day 2. Where delegates begin Day 3.
-lab-3-1-solution   Brand toggle moved to a Riverpod provider.
-lab-3-2-solution   Quote flow through QuoteNotifier, idle/loading/loaded/failed.
-lab-4-1-solution   go_router, onboarding guard, result screen.
-lab-4-2-solution   Real quote API with dio.
-lab-4-3-solution   Onboarding to capture to API to result to saved. End of Day 4.
-```
+Your very first Flutter build downloads about **4 GB** (a 2.8 GB Android NDK, the SDK platform, and the Gradle distribution) and takes seven to eight minutes. Twenty of us doing that at once on the venue network will not go well.
 
-Work on the app in a **separate clone**, so switching branches never fights
-the materials:
+Once your install is done, run this at your own desk:
 
 ```
-git clone <this repo> flutter-labs
-cd flutter-labs
-git checkout lab-3-start
-cd quote_app && flutter pub get && flutter run
+flutter create precourse_check
 ```
 
-Keep this clone on the materials branches (`main`, `day*-materials`) and the
-other one on `lab-*`. `quote_app/` is gitignored here for that reason.
-
-## Running the app
+```
+cd precourse_check
+```
 
 ```
-cd quote_app
-flutter pub get
+flutter build apk --debug
+```
+
+Wait for the line that says it built `app-debug.apk`, then delete the folder. Every build after that is seconds instead of minutes, and you have proved your setup works before Day 1 starts.
+
+---
+
+## Part 1 · Install the Flutter SDK
+
+### Windows (PowerShell)
+
+Two rules: **no spaces in the path**, and **not inside Program Files**.
+
+```powershell
+# 1. Download the stable Windows zip from
+#    https://docs.flutter.dev/get-started/install/windows
+#    Extract it to C:\src\flutter   (so you end up with C:\src\flutter\bin)
+Expand-Archive "$HOME\Downloads\flutter_windows_*-stable.zip" C:\src
+```
+
+```powershell
+# 2. Add to your USER Path (this appends without duplicating machine entries)
+$u = [Environment]::GetEnvironmentVariable("Path", "User")
+[Environment]::SetEnvironmentVariable("Path", "$u;C:\src\flutter\bin", "User")
+```
+
+```powershell
+# 3. CLOSE this terminal, open a NEW PowerShell, then:
+flutter --version
+```
+
+```powershell
+# 4. Two Windows housekeeping items
+git config --system core.longpaths true
+# Add C:\src\flutter and your projects folder to your antivirus exclusions,
+# or Gradle builds will be 3-5x slower.
+```
+
+### macOS (zsh)
+
+```bash
+# 1. Download the stable macOS zip (Apple Silicon or Intel) from
+#    https://docs.flutter.dev/get-started/install/macos
+mkdir -p ~/development
+cd ~/development
+unzip ~/Downloads/flutter_macos_arm64_*-stable.zip
+```
+
+```bash
+# 2. PATH
+echo 'export PATH="$HOME/development/flutter/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+
+# 3. Verify
+flutter --version
+```
+
+```bash
+# 4. Only if you want to build for iOS (not needed for this course)
+xcode-select --install
+sudo gem install cocoapods
+```
+
+---
+
+## Part 2 · Android toolchain
+
+Install **Android Studio** from https://developer.android.com/studio and run the first-run wizard with the **Standard** install.
+
+Then **Android Studio → More Actions → SDK Manager**:
+
+**SDK Platforms tab**: tick the latest stable API.
+
+**SDK Tools tab**: tick:
+- Android SDK Build-Tools
+- Android SDK Command-line Tools (latest) ← *the one people miss*
+- Android Emulator
+- Android SDK Platform-Tools
+- **Windows only:** Android Emulator Hypervisor Driver
+
+Then accept the licences:
+
+```powershell
+flutter doctor --android-licenses
+# press y at every prompt
+```
+
+### Windows: emulator acceleration
+
+The emulator needs hardware virtualisation. Either the **Android Emulator Hypervisor Driver** above, or **Windows Hypervisor Platform**:
+
+> Control Panel → Programs → Turn Windows features on or off → tick **Windows Hypervisor Platform** → reboot
+
+If your BIOS has virtualisation disabled, or company policy blocks Hyper-V, the emulator will not boot. Use a **physical phone** (Part 4) or `flutter run -d chrome`. This is normal and everything today still works.
+
+---
+
+## Part 3 · flutter doctor
+
+```powershell
+flutter doctor
+flutter doctor -v          # verbose: shows the paths it is using
+```
+
+You need green ticks for **Flutter** and **Android toolchain**. Current Flutter no longer reports an IDE in `flutter doctor`, so do not go looking for one. These warnings are fine and can be ignored today:
+
+
+- `[!] Visual Studio`: only needed for Windows desktop apps
+- `[!] Chrome`: only needed for web
+
+> **PowerShell 5.1 has no `&&`.** Windows 10/11 opens Windows PowerShell 5.1 by
+> default, and chaining commands with `&&` gives *"The token '&&' is not a valid
+> statement separator in this version"*. Every command in this handbook is one
+> line at a time. Run them one at a time.
+
+### Common fixes
+
+| Message | Fix |
+|---|---|
+| `flutter` is not recognised | You did not open a **new** terminal after changing Path |
+| `cmdline-tools component is missing` | SDK Manager → SDK Tools → tick *Android SDK Command-line Tools (latest)* |
+| `Android license status unknown` **and** `--licenses` replies *"no longer needed"* | **Expected on current tools, not your machine.** Android replaced `sdkmanager` with the new `android` CLI, and Flutter's licence check has not caught up ([flutter #191487](https://github.com/flutter/flutter/issues/191487)). Your licences *are* accepted. Verify with the build test below and carry on. |
+| `Android license status unknown` on older command-line tools | `flutter doctor --android-licenses` then y to everything |
+| `Multiple adb binaries found` | You have platform-tools twice. Keep Android Studio's and remove the other. macOS: `brew uninstall --cask android-platform-tools`. Windows: take the standalone platform-tools folder off your PATH. |
+| `Unable to find git in your PATH` | Install Git for Windows, tick "Git from the command line", reopen terminal |
+| `Android Studio not installed` (but it is) | `flutter config --android-studio-dir "C:\Program Files\Android\Android Studio"` |
+| `Unsupported class file major version` during build | `flutter config --jdk-dir "C:\Program Files\Android\Android Studio\jbr"` |
+
+```powershell
+# Useful anytime
+flutter upgrade
+flutter channel stable
+flutter config --android-sdk "$env:LOCALAPPDATA\Android\Sdk"
+```
+
+### The only test that really matters
+
+`flutter doctor` can be wrong. A build cannot. If doctor shows the licence X but this succeeds, your Android setup is fine:
+
+```powershell
+flutter create sanity_check
+cd sanity_check
+flutter build apk --debug
+```
+
+A `Built build\app\outputs\flutter-apk\app-debug.apk` line means you are ready. Delete the folder afterwards.
+
+---
+
+## Part 4 · Create an emulator, or use a phone
+
+### Emulator
+
+**Android Studio → Device Manager → Create Device → Pixel 8 → the latest stable API (x86_64 on Windows, arm64-v8a on Apple Silicon) → Finish → ▶**
+
+Start it once now. The first boot takes 1-3 minutes.
+
+```powershell
+flutter emulators                       # list AVDs
+flutter emulators --launch pixel8       # start one
+flutter devices                         # what flutter run can target
+```
+
+### Physical Android phone (faster, and the fallback if the emulator fails)
+
+1. On the phone: **Settings → About phone → tap Build number 7 times**
+2. **Settings → Developer options → USB debugging** ON
+3. Plug in with a **data** cable (many charging cables have no data lines)
+4. Accept the "Allow USB debugging" prompt on the phone
+
+```powershell
+adb devices          # the phone should be listed
+flutter devices
 flutter run
-flutter analyze
-flutter test
+```
+
+If `adb devices` is empty on Windows, you need the OEM USB driver: Google/Pixel → *Google USB Driver* in SDK Manager; Samsung → Smart Switch; Huawei → HiSuite.
+
+```powershell
+# adb lives here if it is not on your Path
+& "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe" devices
+```
+
+---
+
+## Part 5 · VS Code setup
+
+Install the **Flutter** extension (it pulls in Dart automatically).
+
+Shortcuts you will use all week:
+
+| Action | Windows | macOS |
+|---|---|---|
+| Command Palette | `Ctrl+Shift+P` | `Cmd+Shift+P` |
+| Quick fix / refactor | `Ctrl+.` | `Cmd+.` |
+| Start debugging | `F5` | `F5` |
+| Format document | `Shift+Alt+F` | `Shift+Option+F` |
+
+Optional project settings. Create `.vscode/settings.json`:
+
+```json
+{
+  "editor.formatOnSave": true,
+  "dart.lineLength": 100,
+  "dart.previewFlutterUiGuides": true,
+  "dart.flutterHotReloadOnSave": "all",
+  "[dart]": {
+    "editor.rulers": [100],
+    "editor.selectionHighlight": false,
+    "editor.tabCompletion": "onlySnippets",
+    "editor.wordBasedSuggestions": "off"
+  }
+}
+```
+
+Snippets: type `stless` or `stful` then Tab.
+
+---
+
+## LAB 1.1 · Toolchain verified · 25 min
+
+**Goal:** the template app runs on your emulator or phone with working hot reload.
+
+```powershell
+# 1. Confirm the toolchain
+flutter doctor
+```
+
+```powershell
+# 2. Create the project (--org sets the Android package / iOS bundle id, do it now, changing it later is painful)
+flutter create --org za.co.moint quote_app
+cd quote_app
+```
+
+```powershell
+# 3. Start your emulator (or plug in the phone), then confirm Flutter sees it
+flutter devices
+```
+
+```powershell
+# 4. Run it. If you did the pre-course build this is quick. If not, expect 7-8 minutes and a ~4 GB download the first time.
+flutter run
 ```
 
 **5.** Open `lib/main.dart`, change the AppBar title text, save, then press **`r`** in the terminal. The title changes and the counter keeps its value. That is **hot reload**.
@@ -92,8 +321,8 @@ void main() {
   count = 5;
   // count = 'five';          // compile error: String is not int
 
-  final createdAt = DateTime.now();   // set once, at runtime  (= JS const). Use case: API responses, database queries, current timestamps.
-  const vatRate = 0.15;               // compile-time constant. Use case: Hardcoded strings, colors, static widgets.
+  final createdAt = DateTime.now();   // set once, at runtime  (= JS const)
+  const vatRate = 0.15;               // compile-time constant
   const brand = 'Alpha Insure';
 
   double premium = 1450.0;            // explicit type where it helps the reader
@@ -563,29 +792,37 @@ class PremiumBadge extends StatelessWidget {
 }
 ```
 
-Day 4 onwards needs the mock API in a second terminal:
+### 6. Delete the generated test
 
-```
-dart run tool/mock_server.dart
+`flutter create` wrote `test/widget_test.dart`, which still refers to `MyApp`. You
+just replaced that with `QuoteApp`, so `flutter analyze` will fail on it, and
+`dart fix --apply` will **not** repair it. Delete it. We write a real one on Day 5.
+
+```powershell
+del test\widget_test.dart
 ```
 
-Android emulator reaches it at `10.0.2.2:8080` (the default). For Chrome or
-the iOS simulator:
+macOS:
 
+```bash
+rm test/widget_test.dart
 ```
-flutter run --dart-define=API_URL=http://localhost:8080
+
+### 7. Run it
+
+```powershell
+flutter run
+```
 
 Tap the segments, tap Calculate, watch the premium change.
 
 ### 8. Try the Extract Widget refactor
 
-Put your cursor on the `Text(...)` inside `PremiumBadge`, press `⌥+Enter`, and look at the refactor menu: **Wrap with Padding / Center / Column**, **Extract Widget**. You will use this constantly.
+Put your cursor on the `Text(...)` inside `PremiumBadge`, press `Ctrl+.` (`Cmd+.`), and look at the refactor menu: **Wrap with Padding / Center / Column**, **Extract Widget**. You will use this constantly.
 
 ### 9. Open the Widget Inspector
 
-With your app running on the emulator/device, go to View → Tool Windows → Flutter Inspector (or find the "Flutter Inspector" tab, usually docked on the right or bottom).
-In that panel's toolbar, click the Toggle Select Widget Mode button (looks like a target/cursor select icon).
-Tap the premium text on the emulator — it highlights the widget tree and jumps you to the matching source line, same as the DevTools version.
+`Ctrl+Shift+P` → **Flutter: Open DevTools** → Widget Inspector → turn on **Select Widget Mode** → tap the premium text on the emulator. It jumps to your source line.
 
 ```powershell
 flutter analyze          # must be clean
@@ -594,8 +831,7 @@ git add .
 git commit -m "Day 1: skeleton"
 ```
 
-## Course shape
-**Stretch** TODO MISH
+**Stretch**
 1. Make Calculate async: `await FakeQuoteService().getQuote(...)` with a `CircularProgressIndicator` while it runs. Add `if (!mounted) return;` after the await.
 2. `flutter pub add intl`, then format with `NumberFormat.currency(locale: 'en_ZA', symbol: 'R ').format(premium)`.
 3. Add a second screen and `Navigator.push` to it, a preview of Day 4.
@@ -652,19 +888,72 @@ git commit -m "Day 1: skeleton"
 | Expo Router | `go_router` (Day 4) |
 | Fast Refresh | Hot reload (`r`) |
 
-| Day | Subject | Deck |
+### Five Dart habits that catch newcomers
+
+| Habit | What happens | Do this instead |
 |---|---|---|
-| 1 | Foundations and Dart | `slides/Day1_Foundations_and_Dart.pptx` |
-| 2 | Widgets and layout | `slides/Day2_Widgets_and_Layout.pptx` |
-| 3 | State management | `slides/Day3_State_Management.pptx` |
-| 4 | Data, APIs and navigation | `slides/Day4_Data_APIs_Navigation.pptx` |
-| 5 | Testing, CI/CD and shipping | `slides/Day5_Testing_CICD_Shipping.pptx` |
+| Forgetting `.toList()` | `map`/`where` give a lazy `Iterable`; type error | Chain `.toList()` |
+| Using `!` to silence the compiler | Runtime null crash later | `?.`, `??`, early return, `required` |
+| Mutating state objects | Widgets do not rebuild | New object + `copyWith` |
+| No `==` on your own classes | Two equal objects compare as different | Override `==`/`hashCode` |
+| Expecting int/double to interchange | `1` is int, `1.0` is double | Cast via `num`: `(j['x'] as num).toDouble()` |
 
-CAN;T USE COLOR AND DECORAITIN
+---
 
-1. What does flutter mean by the size from the child and width and height constraint from parent?
-2. Infinite width canvas - redners perfectly on al the different screens all the different time.
-3. Safe Area for phone camera and iPhone island
-4. Dismissed not on the UI e..g swipe to remove a product, click on undo and it comes back
+## Part 8 · Troubleshooting
 
-Rows children unbounded width. Wrapped in an expanded
+| Symptom | Cause | Fix |
+|---|---|---|
+| `flutter` not recognised | PATH not applied | Open a **new** terminal; no spaces in the SDK path |
+| `cmdline-tools component is missing` | SDK tool not installed | SDK Manager → SDK Tools → Command-line Tools (latest) |
+| `Android license status unknown`, `--licenses` says "no longer needed" | Known Flutter bug with command-line tools 23.0+ | Cosmetic, licences are accepted. Prove it with `flutter build apk --debug` |
+| `Android license status unknown` (older tools) | Licences not accepted | `flutter doctor --android-licenses` → y to all |
+| `Multiple adb binaries found` | platform-tools installed twice | Remove the duplicate; keep Android Studio's |
+| Emulator stuck on the boot logo | No hardware acceleration | Hypervisor Driver / WHPX + BIOS virtualisation; else use a phone or Chrome |
+| `adb devices` empty (Windows) | Missing USB driver or charge-only cable | Install the OEM driver; swap the cable |
+| `Unsupported class file major version` | Wrong JDK | `flutter config --jdk-dir "C:\Program Files\Android\Android Studio\jbr"` |
+| First build takes forever | It downloads ~4 GB: NDK, SDK platform, Gradle | Expected on a first build. Ask for the pre-warmed cache on the USB stick, or pair with someone who is already warmed |
+| `MissingPluginException` | Hot reload after adding a native plugin | Stop and `flutter run` again |
+| Hot reload "did nothing" | Change in `main()` / initialiser / `const` / enum | Press `R` (hot restart) |
+| `setState() called after dispose()` | Async callback after leaving the screen | `if (!mounted) return;` after every `await` |
+| `Filename too long` (git, Windows) | Long paths off | `git config --system core.longpaths true` |
+| Build broken for no reason | Stale artefacts | `flutter clean` then `flutter pub get` |
+
+---
+
+## Part 9 · Homework for Day 2
+
+Read **https://docs.flutter.dev/ui/layout/constraints**: the whole page, including the 29 examples. About 25 minutes. Run a few of them in DartPad.
+
+Be ready to answer these at the whiteboard at 09:00 tomorrow:
+
+1. Say the rule *"constraints go down, sizes go up, parent sets position"* in your own words, with one example.
+2. Why does a `Container` with no child fill its parent, but the same `Container` inside a `Column` have zero height?
+3. What is an "unbounded constraint" and which two widgets most often cause one?
+4. Pick one of the 29 examples that surprised you and be ready to show it.
+
+Layout is the biggest gap in the pre-course survey, so this reading is the preparation that makes tomorrow work.
+
+---
+
+## Links from today
+
+| Topic | Link |
+|---|---|
+| Install (Windows) | https://docs.flutter.dev/get-started/install/windows |
+| Install (macOS) | https://docs.flutter.dev/get-started/install/macos |
+| Emulator acceleration | https://developer.android.com/studio/run/emulator-acceleration |
+| Flutter architecture | https://docs.flutter.dev/resources/architectural-overview |
+| Dart language tour | https://dart.dev/language |
+| Null safety in depth | https://dart.dev/null-safety/understanding-null-safety |
+| Patterns & sealed classes | https://dart.dev/language/patterns |
+| DartPad | https://dartpad.dev |
+| Widgets intro | https://docs.flutter.dev/ui/widgets-intro |
+| Inside Flutter (three trees) | https://docs.flutter.dev/resources/inside-flutter |
+| DevTools | https://docs.flutter.dev/tools/devtools |
+| Packages | https://pub.dev |
+| **Tomorrow's reading** | https://docs.flutter.dev/ui/layout/constraints |
+
+---
+
+*MO Integrations · Flutter Mobile Application Development · Day 1 of 5*
