@@ -48,12 +48,12 @@ class PremiumCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
-            Text(
-              'Quote ref ${quote.id}',
-              style: tt.bodySmall?.copyWith(
-                color: cs.onPrimaryContainer,
-              ),
-            ),
+            // Text(
+            //   'Quote ref ${quote.id}',
+            //   style: tt.bodySmall?.copyWith(
+            //     color: cs.onPrimaryContainer,
+            //   ),
+            // ),
           ],
         ),
       ),
