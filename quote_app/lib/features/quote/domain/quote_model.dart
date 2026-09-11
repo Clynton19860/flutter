@@ -1,5 +1,3 @@
-import 'dart:async';
-
 enum Cover {
   thirdParty,
   thirdPartyFireTheft,
@@ -113,36 +111,3 @@ String describe(QuoteState s) => switch (s) {
   QuoteLoaded(:final quote) => 'Premium ${quote.display}',
   QuoteFailed(:final message) => 'Error: $message',
 };
-
-abstract interface class QuoteService {
-  Future<Quote> getQuote(QuoteRequest r);
-}
-
-class FakeQuoteService implements QuoteService {
-  @override
-  Future<Quote> getQuote(QuoteRequest r) async {
-    await Future.delayed(const Duration(milliseconds: 1500));
-    if (r.year < 2000) throw Exception('Vehicle too old to insure');
-    return Quote(id: 'q-${r.hashCode}', premium: calculatePremium(r));
-  }
-}
-
-Future<void> runOnce(QuoteService s, QuoteRequest r) async {
-  try {
-    final q = await s.getQuote(r).timeout(const Duration(seconds: 3));
-    print('OK ${q.display}');
-  } on TimeoutException {
-    print('Timed out');
-  } catch (e) {
-    print('Failed: $e');
-  }
-}
-
-Stream<QuoteState> quoteStates(QuoteService s, QuoteRequest r) async* {
-  yield const QuoteLoading();
-  try {
-    yield QuoteLoaded(await s.getQuote(r));
-  } catch (e) {
-    yield QuoteFailed(e.toString());
-  }
-}

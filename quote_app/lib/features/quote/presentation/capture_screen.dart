@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:quote_app/core/theme/brand_provider.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
 import 'package:quote_app/features/quote/presentation/capture_form.dart';
+import 'package:quote_app/features/quote/presentation/quote_providers.dart';
 
 class CaptureScreen extends ConsumerStatefulWidget {
   const CaptureScreen({super.key});
@@ -15,6 +17,20 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
   @override
   Widget build(BuildContext context) {
     final brand = ref.watch(brandProvider);
+    final state = ref.watch(quoteProvider);
+
+    // Side effects: navigation and snackbars. Never in the returned tree.
+    ref.listen(quoteProvider, (prev, next) {
+      switch (next) {
+        case QuoteLoaded(:final quote):
+          context.push('/quote/result/${quote.id}');
+        case QuoteFailed(:final message):
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+        default:
+          break;
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: Text(brand.name),
@@ -30,7 +46,25 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final header = const _BrandHeader();
-            final form = CaptureForm(onSubmit: (r) => _showPremium(context, r));
+            final form = Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                CaptureForm(
+                  enabled: state is! QuoteLoading,
+                  onSubmit: (r) => ref.read(quoteProvider.notifier).submit(r),
+                ),
+                const SizedBox(height: 16),
+                switch (state) {
+                  QuoteIdle() => const Text('Fill in the form to get a quote'),
+                  QuoteLoading() => const Center(child: CircularProgressIndicator()),
+                  QuoteLoaded() => const Text('Opening your quote...'),
+                  QuoteFailed(:final message) => Text(
+                    message,
+                    style: TextStyle(color: Theme.of(context).colorScheme.error),
+                  ),
+                },
+              ],
+            );
 
             if (constraints.maxWidth >= 700) {
               return Row(
@@ -55,11 +89,6 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
         ),
       ),
     );
-  }
-
-  void _showPremium(BuildContext context, QuoteRequest r) {
-    final premium = calculatePremium(r);
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Premium ${premium.rands}')));
   }
 }
 

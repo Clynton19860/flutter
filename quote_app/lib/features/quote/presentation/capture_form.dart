@@ -4,8 +4,9 @@ import 'package:intl/intl.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
 
 class CaptureForm extends StatefulWidget {
-  const CaptureForm({super.key, required this.onSubmit});
+  const CaptureForm({super.key, required this.onSubmit, this.enabled = true});
   final void Function(QuoteRequest) onSubmit;
+  final bool enabled;
 
   @override
   State<CaptureForm> createState() => _CaptureFormState();
@@ -126,9 +127,15 @@ class _CaptureFormState extends State<CaptureForm> {
       _LicenceDateField(value: _licenceDate, onChanged: (d) => setState(() => _licenceDate = d)),
       const SizedBox(height: 24),
       FilledButton.icon(
-        onPressed: _submit,
-        icon: const Icon(Icons.calculate),
-        label: const Text('Get quote'),
+        onPressed: widget.enabled ? _submit : null,
+        icon: widget.enabled
+            ? const Icon(Icons.calculate)
+            : const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+        label: Text(widget.enabled ? 'Get quote' : 'Calculating...'),
       ),
       const SizedBox(height: 12),
       OutlinedButton(onPressed: _reset, child: const Text('Reset')),
