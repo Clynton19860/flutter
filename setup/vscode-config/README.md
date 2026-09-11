@@ -9,13 +9,13 @@ Copy this folder into your `quote_app` project and rename it `.vscode`:
 **Windows (PowerShell), from inside `quote_app`:**
 
 ```
-xcopy /E /I ..\flutter\vscode-config .vscode
+xcopy /E /I ..\flutter\setup\vscode-config .vscode
 ```
 
 **macOS, from inside `quote_app`:**
 
 ```
-cp -R ../flutter/vscode-config .vscode
+cp -R ../flutter/setup/vscode-config .vscode
 ```
 
 Reload VS Code afterwards, or close and reopen the folder.

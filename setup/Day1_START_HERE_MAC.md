@@ -192,6 +192,33 @@ Good news on a Mac: there is no Hyper-V, no BIOS setting and no hypervisor drive
 
 One thing to get right when you create a device: on **Apple Silicon** pick an **arm64-v8a** system image. An x86_64 image will be unusably slow or will not boot at all.
 
+### A note for later: the iOS Simulator
+
+You do **not** need this for Day 1, and you do not need it for the week — every
+lab runs on the Android emulator or in Chrome. Set it up when you have time.
+
+The iOS Simulator ships inside **Xcode**, so Xcode has to be installed first:
+App Store → search Xcode → Get. It is around 10 GB and takes 30–60 minutes.
+Command Line Tools on their own are not enough — that is what
+`flutter doctor` means by *"Xcode installation is incomplete"*.
+
+Once Xcode is in place, run the script instead of doing it by hand:
+
+```
+cd <the course repo>
+./setup/setup_ios_simulator.sh --check     # report only, changes nothing
+./setup/setup_ios_simulator.sh             # do it
+```
+
+It points the command line tools at Xcode, accepts the licence, installs the
+first-launch components and the iOS runtime, checks CocoaPods, creates and
+boots a simulator, and finishes with `flutter doctor`. It asks for your Mac
+password once, up front, and it is safe to run again if a step fails.
+
+One difference to remember once it works: the simulator shares your Mac's
+network, so a local API is at `localhost` — **not** `10.0.2.2`, which is the
+Android emulator's address for your machine.
+
 **Nothing on this page can stop you taking part this morning.** All of today's first exercises run in the browser.
 
 ---
