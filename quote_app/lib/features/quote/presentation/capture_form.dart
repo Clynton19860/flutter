@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
 import 'package:quote_app/features/quote/presentation/quote_providers.dart';
 
-class CaptureForm extends StatefulWidget {
+class CaptureForm extends ConsumerStatefulWidget {
   const CaptureForm({super.key, required this.onSubmit, this.enabled = true});
   final void Function(QuoteRequest) onSubmit;
   final bool enabled;
 
   @override
-  State<CaptureForm> createState() => _CaptureFormState();
+  ConsumerState<CaptureForm> createState() => _CaptureFormState();
 }
 
-class _CaptureFormState extends State<CaptureForm> {
+class _CaptureFormState extends ConsumerState<CaptureForm> {
   final _formKey = GlobalKey<FormState>();
   final _makeCtrl = TextEditingController();
   final _yearCtrl = TextEditingController();
@@ -29,7 +30,6 @@ class _CaptureFormState extends State<CaptureForm> {
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
     final year = int.parse(_yearCtrl.text);
-    // TODO: debug ref(clockProvider)
     final licenceYear = _licenceDate?.year ?? ref.read(clockProvider)().year;
     final age = ref.read(clockProvider)().year - licenceYear + 18;
     widget.onSubmit(QuoteRequest(
@@ -78,7 +78,6 @@ class _CaptureFormState extends State<CaptureForm> {
             validator: (v) {
               final y = int.tryParse(v ?? '');
               if (y == null) return 'Enter a 4-digit year';
-              // TODO: debug ref(clockProvider)
               if (y < 1990 || y > ref.read(clockProvider)().year) {
                 return 'Year must be 1990-${ref.read(clockProvider)().year}';
               }
@@ -121,13 +120,13 @@ class _CaptureFormState extends State<CaptureForm> {
       );
 }
 
-class _LicenceDateField extends StatelessWidget {
+class _LicenceDateField extends ConsumerWidget {
   const _LicenceDateField({required this.value, required this.onChanged});
   final DateTime? value;
   final ValueChanged<DateTime?> onChanged;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final text = value == null
         ? 'Select date'
         : MaterialLocalizations.of(context).formatMediumDate(value!);
@@ -140,7 +139,6 @@ class _LicenceDateField extends StatelessWidget {
           errorText: state.errorText,
           suffixIcon: const Icon(Icons.calendar_today),
         ),
-        // TODO: debug ref(clockProvider)
         child: InkWell(
           onTap: () async {
             final now = ref.read(clockProvider)();
