@@ -1,3 +1,7 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'quote_model.g.dart';
+
 // ---------- 1. Cover ----------
 enum Cover {
   thirdParty,
@@ -23,6 +27,7 @@ enum Cover {
 //       const constructor with required named params
 //       copyWith
 
+@JsonSerializable()
 class QuoteRequest {
   final String make;
   final String? model;
@@ -53,12 +58,17 @@ class QuoteRequest {
       cover: cover ?? this.cover,
     );
   }
+
+  factory QuoteRequest.fromJson(Map<String, dynamic> json) =>
+      _$QuoteRequestFromJson(json);
+  Map<String, dynamic> toJson() => _$QuoteRequestToJson(this);
 }
 
 // ---------- 3. Quote ----------
 // TODO: id (String), premium (double), currency defaulting to 'ZAR'
 //       a `display` getter, fromJson / toJson
 
+@JsonSerializable()
 class Quote {
   final String id;
   final double premium;
@@ -70,16 +80,8 @@ class Quote {
   String get formattedDisplay =>
       'ID: $id\nPremium: ${premium.toStringAsFixed(2)}\nCurrency: $currency';
 
-  factory Quote.fromJsom(Map<String, dynamic> q) => Quote(
-    id: q['id'] as String,
-    premium: (q['premium'] as num).toDouble(),
-    currency: q['currency'] as String,
-  );
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'premium': premium,
-    'currency': currency,
-  };
+  factory Quote.fromJson(Map<String, dynamic> json) => _$QuoteFromJson(json);
+  Map<String, dynamic> toJson() => _$QuoteToJson(this);
 }
 
 // ---------- 4. Premium calculation ----------
