@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../domain/quote_model.dart';
 import './capture_form.dart';
 import 'package:quote_app/core/theme/brand_provider.dart';
+import 'package:quote_app/features/quote/presentation/quote_providers.dart';
+import 'premium_card.dart';
+
 
 const largeScreenMinWidth = 700;
 
@@ -14,6 +17,21 @@ class CaptureScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final brand = ref.watch(brandProvider);
+    final quoteState = ref.watch(quoteProvider);
+    final isLoading = quoteState is Loading;
+
+ref.listen<QuoteState>(
+  quoteProvider,
+  (previous, next) {
+    if (next is Failed) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(next.message),
+        ),
+      );
+    }
+  },
+);
     return Scaffold(
       appBar: AppBar(
         title: Text(brand.name),
@@ -42,23 +60,25 @@ class CaptureScreen extends ConsumerWidget {
                   Expanded(
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.all(16),
-                      child: Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(24),
-                          child: CaptureForm(
-                            onSubmit: (request) {
-                              final premium = calculatePremium(request);
-
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Premium: R ${premium.toStringAsFixed(2)}',
-                                  ),
-                                ),
-                              );
-                            },
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: CaptureForm(
+                                enabled: !isLoading,
+                                onSubmit: (request) {
+                                  ref.read(quoteProvider.notifier).submit(request);
+                                },
+                              ),
+                            ),
                           ),
-                        ),
+                          if (quoteState is Loaded)
+                            PremiumCard(
+                              quote: quoteState.quote,
+                            ),
+                        ],
                       ),
                     ),
                   ),
@@ -71,28 +91,20 @@ class CaptureScreen extends ConsumerWidget {
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-
                   children: [
                     _BrandHeader(),
                     const SizedBox(height: 24),
-            Card(
-            child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: CaptureForm(
-            onSubmit: (request) {
-            final premium = calculatePremium(request);
-
-            ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-            content: Text(
-            'Premium: R ${premium.toStringAsFixed(2)}',
-            ),
-            ),
-            );
-            },
-            ),
-            ),
-            ),
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: CaptureForm(
+                          enabled: !isLoading,
+                          onSubmit: (request) {
+                          ref.read(quoteProvider.notifier).submit(request);
+                        },
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -113,7 +125,7 @@ const _BrandHeader();
 
 
 Widget build(BuildContext context, WidgetRef ref) {
-  final brand = ref.read(brandProvider);
+final brand = ref.watch(brandProvider);
 
   return Stack(
         clipBehavior: Clip.none,

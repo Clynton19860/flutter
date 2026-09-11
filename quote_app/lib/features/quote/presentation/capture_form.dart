@@ -5,9 +5,10 @@ import '../domain/quote_model.dart';
 
 
 class _LicenceDateField extends StatelessWidget {
-  const _LicenceDateField({required this.value, required this.onChanged});
+  const _LicenceDateField({required this.value, required this.onChanged, required this.enabled});
   final DateTime? value;
   final ValueChanged<DateTime?> onChanged;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -24,19 +25,27 @@ class _LicenceDateField extends StatelessWidget {
           suffixIcon: const Icon(Icons.calendar_today),
         ),
         child: InkWell(
-          onTap: () async {
-            final now = DateTime.now();
-            final picked = await showDatePicker(
-              context: context,
-              initialDate: value ?? DateTime(now.year - 5),
-              firstDate: DateTime(1950),
-              lastDate: now,
-            );
-            if (picked != null) {
-              state.didChange(picked);
-              onChanged(picked);
-            }
-          },
+        onTap: enabled
+    ? () async {
+        debugPrint('Date field tapped');
+
+        final now = DateTime.now();
+
+        final picked = await showDatePicker(
+          context: context,
+          initialDate: value ?? DateTime(now.year - 5),
+          firstDate: DateTime(1950),
+          lastDate: now,
+        );
+
+        debugPrint('Picked: $picked');
+
+        if (picked != null) {
+          state.didChange(picked);
+          onChanged(picked);
+        }
+      }
+    : null,
           child: Text(text),
         ),
       ),
@@ -45,8 +54,14 @@ class _LicenceDateField extends StatelessWidget {
 }
 
 class CaptureForm extends StatefulWidget {
-  const CaptureForm({super.key, required this.onSubmit});
+  const CaptureForm({
+    super.key,
+    required this.onSubmit,
+    required this.enabled,
+  });
+
   final void Function(QuoteRequest) onSubmit;
+  final bool enabled;
 
   @override
   State<CaptureForm> createState() => _CaptureFormState();
@@ -110,6 +125,7 @@ class _CaptureFormState extends State<CaptureForm> {
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       TextFormField(
+        enabled: widget.enabled,
         controller: _makeCtrl,
         decoration: const InputDecoration(labelText: 'Vehicle make', hintText: 'e.g. VW'),
         textInputAction: TextInputAction.next,
@@ -118,6 +134,7 @@ class _CaptureFormState extends State<CaptureForm> {
       ),
       const SizedBox(height: 12),
       TextFormField(
+        enabled: widget.enabled,
         controller: _yearCtrl,
         decoration: const InputDecoration(labelText: 'Year'),
         keyboardType: TextInputType.number,
@@ -146,19 +163,31 @@ class _CaptureFormState extends State<CaptureForm> {
       const SizedBox(height: 12),
       _LicenceDateField(
         value: _licenceDate,
+        enabled: widget.enabled,
         onChanged: (d) => setState(() => _licenceDate = d),
       ),
       const SizedBox(height: 24),
       FilledButton.icon(
-        onPressed: _submit,
-        icon: const Icon(Icons.calculate),
-        label: const Text('Get quote'),
-
-      ),
+  onPressed: widget.enabled ? _submit : null,
+  icon: widget.enabled
+      ? const Icon(Icons.calculate)
+      : const SizedBox(
+          width: 16,
+          height: 16,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+          ),
+        ),
+  label: Text(
+    widget.enabled
+        ? 'Get quote'
+        : 'Calculating...',
+  ),
+),
       const SizedBox(height: 12),
 
       OutlinedButton(
-        onPressed: _reset,
+        onPressed: widget.enabled ? _reset : null,
         child: const Text('Reset'),
       ),
     ],
