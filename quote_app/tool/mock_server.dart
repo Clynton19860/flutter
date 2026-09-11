@@ -52,6 +52,9 @@ Future<void> main() async {
         continue;
       }
 
+      final driverAge = (body['driverAge'] as num).toInt();
+      final vehicleAge = DateTime.now().year - year;
+
       res.write(
         jsonEncode({
           'id': 'q-${DateTime.now().millisecondsSinceEpoch}',
@@ -59,8 +62,8 @@ Future<void> main() async {
           'currency': 'ZAR',
           'breakdown_lines': [
             'Base premium',
-            if ((body['driverAge'] as num).toInt() < 25) 'Young driver loading',
-            if (year < 2015) 'Vehicle age loading',
+            if (driverAge < 25) 'Young driver loading (age $driverAge)',
+            if (year < 2015) 'Vehicle age loading ($vehicleAge years old)',
           ],
         }),
       );
