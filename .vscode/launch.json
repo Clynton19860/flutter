@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "quote_app (Android emulator)",
+      "request": "launch",
+      "type": "dart",
+      "program": "quote_app/lib/main.dart",
+      "deviceId": "emulator"
+    },
+    {
+      "name": "quote_app (Chrome fallback)",
+      "request": "launch",
+      "type": "dart",
+      "program": "quote_app/lib/main.dart",
+      "deviceId": "chrome"
+    }
+  ]
+}

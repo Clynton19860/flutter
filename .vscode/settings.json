@@ -1,3 +1,16 @@
 {
-    "dart.projectSearchDepth": 4
+  "editor.formatOnSave": true,
+  "dart.lineLength": 100,
+  "dart.previewFlutterUiGuides": true,
+  "dart.flutterHotReloadOnSave": "all",
+  "dart.openDevTools": "flutter",
+  "[dart]": {
+    "editor.rulers": [
+      100
+    ],
+    "editor.selectionHighlight": false,
+    "editor.tabCompletion": "onlySnippets",
+    "editor.wordBasedSuggestions": "off",
+    "editor.defaultFormatter": "Dart-Code.dart-code"
+  }
 }
