@@ -38,13 +38,21 @@ const brands = <String, BrandTheme>{
   'alpha': BrandTheme(
     key: 'alpha',
     name: 'Alpha Insure',
-    seed: Color(0xFF6A0DAD), // Galactic Purple
+    seed: Color(0xFF6A0DAD),
     logoAsset: 'assets/brands/alpha.png',
   ),
+
   'beta': BrandTheme(
     key: 'beta',
     name: 'Beta Cover',
-    seed: Color(0xFF0A192F), // Deep Space Blue
+    seed: Color(0xFF0A192F),
     logoAsset: 'assets/brands/beta.png',
+  ),
+
+  'gamma': BrandTheme(
+    key: 'gamma',
+    name: 'Gamma Protect',
+    seed: Color(0xFF00897B),
+    logoAsset: 'assets/brands/gamma.png',
   ),
 };

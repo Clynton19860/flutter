@@ -1,26 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../domain/quote_model.dart';
 import './capture_form.dart';
-import 'package:quote_app/core/theme/brand_theme.dart';
+import 'package:quote_app/core/theme/brand_provider.dart';
 
 const largeScreenMinWidth = 700;
 
-class CaptureScreen extends StatelessWidget {
-  const CaptureScreen({super.key, required this.brand, required this.onSwitchBrand});
-  final BrandTheme brand;
-  final VoidCallback onSwitchBrand;
-
+class CaptureScreen extends ConsumerWidget {
+  const CaptureScreen({super.key});
 
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final brand = ref.watch(brandProvider);
     return Scaffold(
       appBar: AppBar(
         title: Text(brand.name),
         actions: [
           IconButton(
             icon: const Icon(Icons.swap_horiz),
-            onPressed: onSwitchBrand,
+            onPressed: () {
+              ref.read(brandKeyProvider.notifier).toggle();
+            },
           ),
         ],
       ),
@@ -35,10 +37,7 @@ class CaptureScreen extends StatelessWidget {
                 children: [
                   SizedBox(
                     width: 280,
-                    child: _BrandHeader(
-                      name: brand.name,
-                      logoAsset: brand.logoAsset,
-                    ),
+                    child: _BrandHeader(),
                   ),
                   Expanded(
                     child: SingleChildScrollView(
@@ -74,10 +73,7 @@ class CaptureScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
 
                   children: [
-                    _BrandHeader(
-                name: brand.name,
-                logoAsset: brand.logoAsset,
-                ),
+                    _BrandHeader(),
                     const SizedBox(height: 24),
             Card(
             child: Padding(
@@ -111,15 +107,15 @@ class CaptureScreen extends StatelessWidget {
 
 
 
-class _BrandHeader extends StatelessWidget {
-  const _BrandHeader({required this.name, required this.logoAsset});
+class _BrandHeader extends ConsumerWidget {
+const _BrandHeader();
+@override
 
-  final String name;
-  final String logoAsset;
 
-  @override
-  Widget build(BuildContext context) =>
-      Stack(
+Widget build(BuildContext context, WidgetRef ref) {
+  final brand = ref.read(brandProvider);
+
+  return Stack(
         clipBehavior: Clip.none,
         children: [
           Container(
@@ -134,7 +130,7 @@ class _BrandHeader extends StatelessWidget {
           ),
           Positioned(
             left: 16, top: 16,
-            child: Text(name,
+            child: Text(brand.name,
                 style: Theme
                     .of(context)
                     .textTheme
@@ -150,7 +146,7 @@ class _BrandHeader extends StatelessWidget {
             child: Align(
               alignment: Alignment.center,
               child: Image.asset(
-                logoAsset,
+                brand.logoAsset,
                 width: 48,
                 height: 48,
               ),
@@ -158,6 +154,7 @@ class _BrandHeader extends StatelessWidget {
           ),
         ],
       );
+}
 }
 
 class PremiumBadge extends StatelessWidget {
