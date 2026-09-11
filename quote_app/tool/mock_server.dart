@@ -8,7 +8,6 @@
 //   Chrome           -> http://localhost:8080
 import 'dart:convert';
 import 'dart:io';
-import 'package:quote_app/features/quote/presentation/quote_providers.dart';
 
 const _port = 8080;
 
@@ -61,8 +60,7 @@ Future<void> main() async {
       }
 
       res.write(jsonEncode({
-        // TODO: debug ref(clockProvider)
-        'id': 'q-${ref.read(clockProvider)().millisecondsSinceEpoch}',
+        'id': 'q-${DateTime.now}',
         'premium': _premium(body),
         'currency': 'ZAR',
         'breakdown_lines': [

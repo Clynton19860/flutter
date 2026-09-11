@@ -1,11 +1,11 @@
 import 'package:quote_app/features/quote/data/quote_repository.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
-import 'package:quote_app/features/quote/presentation/quote_providers.dart';
 import 'package:sqflite/sqflite.dart';
 
 class SqliteQuoteRepository implements QuoteRepository {
-  SqliteQuoteRepository(this._db);
+  SqliteQuoteRepository(this._db, this._now);
   final Database _db;
+  final DateTime Function() _now;
 
   @override
   Future<List<Quote>> loadAll() async {
@@ -28,8 +28,7 @@ class SqliteQuoteRepository implements QuoteRepository {
           'id': q.id,
           'premium': q.premium,
           'currency': q.currency,
-          // TODO: debug ref(clockProvider)
-          'created_at': ref.read(clockProvider)().millisecondsSinceEpoch,
+          'created_at': _now().millisecondsSinceEpoch,
         },
         // makes save() an upsert
         conflictAlgorithm: ConflictAlgorithm.replace,

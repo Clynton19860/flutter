@@ -17,7 +17,9 @@ Future<ProviderContainer> _container({bool onboarded = false}) async {
   return ProviderContainer(overrides: [
     sharedPrefsProvider.overrideWithValue(prefs),
     quoteRepositoryProvider.overrideWithValue(InMemoryQuoteRepository()),
-    quoteServiceProvider.overrideWithValue(FakeQuoteService()),
+    quoteServiceProvider.overrideWithValue(
+      FakeQuoteService(DateTime.now),
+    ),
   ]);
 }
 

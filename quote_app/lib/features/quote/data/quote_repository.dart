@@ -15,6 +15,6 @@ abstract interface class QuoteRepository {
 final quoteRepositoryProvider = Provider<QuoteRepository>(
   (ref) => SqliteQuoteRepository(
     ref.watch(databaseProvider),
-    now: ref.watch(clockProvider),
+    ref.watch(clockProvider),
   ),
 );

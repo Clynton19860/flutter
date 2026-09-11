@@ -25,7 +25,7 @@ void main() {
         '''),
       ),
     );
-    repo = SqliteQuoteRepository(db);
+    repo = SqliteQuoteRepository(db, DateTime.now);
   });
 
   tearDown(() => db.close());

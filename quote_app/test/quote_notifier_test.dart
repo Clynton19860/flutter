@@ -6,8 +6,14 @@ import 'package:quote_app/features/quote/presentation/quote_providers.dart';
 
 void main() {
   test('submit moves idle to loading to loaded', () async {
+    final now = () => DateTime(2026, 9, 11);
     final container = ProviderContainer(
-      overrides: [quoteServiceProvider.overrideWithValue(FakeQuoteService())],
+      overrides: [
+        clockProvider.overrideWithValue(now),
+        quoteServiceProvider.overrideWithValue(
+          FakeQuoteService(now),
+        ),
+      ],
     );
     addTearDown(container.dispose);
 
