@@ -1,3 +1,7 @@
+# The materials repo has no pubspec. The Dart files here are standalone
+# teaching snippets, not a package - they will not resolve package: imports.
 analyzer:
   exclude:
-    - solutions/**
+    - solutions/**      # worked answers; some intentionally show the bug first
+    - dartpad/**        # DartPad snippets; some warn on purpose (null-safety demo)
+    - challenge/**      # the challenge suite; only resolves once copied into the app
