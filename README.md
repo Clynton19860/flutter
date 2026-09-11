@@ -14,6 +14,7 @@ lab application.
 | `dartpad/` | Ready-to-paste DartPad files for the Day 1 labs. |
 | `setup/` | `START_HERE` install guides and the VS Code config. Do this before Day 1. |
 | `handouts-pdf/` | PDF exports for printing and emailing. |
+| `full-flutter-and-dart-training/` | A separate, longer course: **Flutter for Java Developers**, 8 days. Its own handbooks and decks, four days of Dart before any Flutter. Not part of the 5-day programme above. |
 
 ## The lab app
 
