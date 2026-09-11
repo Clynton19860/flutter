@@ -92,6 +92,8 @@ class _CaptureFormState extends State<CaptureForm> {
   Widget _fields(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
+      CoverPicker(value: _cover, onChanged: (c) => setState(() => _cover = c)),
+      const SizedBox(height: 12),
       TextFormField(
         controller: _makeCtrl,
         decoration: const InputDecoration(
@@ -121,8 +123,6 @@ class _CaptureFormState extends State<CaptureForm> {
           return null;
         },
       ),
-      const SizedBox(height: 12),
-      CoverPicker(value: _cover, onChanged: (c) => setState(() => _cover = c)),
       const SizedBox(height: 12),
       _LicenceDateField(
         value: _licenceDate,

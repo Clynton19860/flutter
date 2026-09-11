@@ -93,7 +93,7 @@ class _CoverCard extends StatelessWidget {
                   Text(
                     cover.label,
                     textAlign: TextAlign.center,
-                    style: tt.labelLarge,
+                    style: tt.labelSmall,
                   ),
                 ],
               ),
