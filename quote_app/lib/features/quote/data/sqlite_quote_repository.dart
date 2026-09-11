@@ -1,5 +1,6 @@
 import 'package:quote_app/features/quote/data/quote_repository.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
+import 'package:quote_app/features/quote/presentation/quote_providers.dart';
 import 'package:sqflite/sqflite.dart';
 
 class SqliteQuoteRepository implements QuoteRepository {
@@ -27,7 +28,8 @@ class SqliteQuoteRepository implements QuoteRepository {
           'id': q.id,
           'premium': q.premium,
           'currency': q.currency,
-          'created_at': DateTime.now().millisecondsSinceEpoch,
+          // TODO: debug ref(clockProvider)
+          'created_at': ref.read(clockProvider)().millisecondsSinceEpoch,
         },
         // makes save() an upsert
         conflictAlgorithm: ConflictAlgorithm.replace,

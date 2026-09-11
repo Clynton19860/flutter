@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
+import 'package:quote_app/features/quote/presentation/quote_providers.dart';
 
 class CaptureForm extends StatefulWidget {
   const CaptureForm({super.key, required this.onSubmit, this.enabled = true});
@@ -28,8 +29,9 @@ class _CaptureFormState extends State<CaptureForm> {
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
     final year = int.parse(_yearCtrl.text);
-    final licenceYear = _licenceDate?.year ?? DateTime.now().year;
-    final age = DateTime.now().year - licenceYear + 18;
+    // TODO: debug ref(clockProvider)
+    final licenceYear = _licenceDate?.year ?? ref.read(clockProvider)().year;
+    final age = ref.read(clockProvider)().year - licenceYear + 18;
     widget.onSubmit(QuoteRequest(
       make: _makeCtrl.text.trim(),
       year: year,
@@ -76,8 +78,9 @@ class _CaptureFormState extends State<CaptureForm> {
             validator: (v) {
               final y = int.tryParse(v ?? '');
               if (y == null) return 'Enter a 4-digit year';
-              if (y < 1990 || y > DateTime.now().year) {
-                return 'Year must be 1990-${DateTime.now().year}';
+              // TODO: debug ref(clockProvider)
+              if (y < 1990 || y > ref.read(clockProvider)().year) {
+                return 'Year must be 1990-${ref.read(clockProvider)().year}';
               }
               return null;
             },
@@ -137,12 +140,13 @@ class _LicenceDateField extends StatelessWidget {
           errorText: state.errorText,
           suffixIcon: const Icon(Icons.calendar_today),
         ),
+        // TODO: debug ref(clockProvider)
         child: InkWell(
           onTap: () async {
-            final now = DateTime.now();
+            final now = ref.read(clockProvider)();
             final picked = await showDatePicker(
               context: context,
-              initialDate: value ?? DateTime(now.year - 5),
+              initialDate: value ?? DateTime(ref.read(clockProvider)().year - 5),
               firstDate: DateTime(1950),
               lastDate: now,
             );

@@ -8,7 +8,10 @@ import 'package:quote_app/features/quote/domain/quote_model.dart';
 
 // The one line that swaps fake for real. Nothing else in the app changes.
 final quoteServiceProvider =
-    Provider<QuoteService>((ref) => DioQuoteService(ref.watch(dioProvider)));
+  Provider<QuoteService>((ref) => DioQuoteService(ref.watch(dioProvider)));
+
+final clockProvider = 
+  Provider<DateTime Function()>((ref) => DateTime.now);
 
 class QuoteNotifier extends Notifier<QuoteState> {
   @override
