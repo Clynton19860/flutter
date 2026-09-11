@@ -1,10 +1,15 @@
 import 'dart:async';
 
 enum Cover { thirdParty, thirdPartyFireTheft, comprehensive;
-    double factor(Cover c) => switch (c) {
+    double get factor=> switch (this) {
       Cover.thirdParty => 0.6,
       Cover.thirdPartyFireTheft => 0.8,
       Cover.comprehensive => 1.0,
+    };
+    String get label => switch (this) {
+      Cover.thirdParty => 'Third party',
+      Cover.thirdPartyFireTheft => 'Third party, fire & theft',
+      Cover.comprehensive => 'Comprehensive',
     };
  }
 
@@ -19,7 +24,7 @@ enum Cover { thirdParty, thirdPartyFireTheft, comprehensive;
 
   const QuoteRequest({
     required this.make,
-    required this.model,
+    this.model,
     required this.year,
     required this.driverAge,
     required this.cover,
@@ -38,7 +43,23 @@ enum Cover { thirdParty, thirdPartyFireTheft, comprehensive;
         driverAge: driverAge ?? this.driverAge,
         cover: cover ?? this.cover,
       );
+  @override
+  bool operator ==(Object other) =>
+      other is QuoteRequest &&
+          other.make == make &&
+          other.model == model &&
+          other.year == year &&
+          other.driverAge == driverAge &&
+          other.cover == cover;
+
+  @override
+  int get hashCode => Object.hash(make, model, year, driverAge, cover);
  }
+
+extension Money on double {
+  String get rands => 'R ${toStringAsFixed(2)}';
+}
+
 
  class Quote {
   final String id;
@@ -47,7 +68,7 @@ enum Cover { thirdParty, thirdPartyFireTheft, comprehensive;
 
   const Quote({required this.id, required this.premium, this.currency = 'ZAR'});
 
-  String get display =>  'currency ${premium.toStringAsFixed(2)}';
+  String get display =>  '$currency ${premium.toStringAsFixed(2)}';
 
   factory Quote.fromJson(Map<String, dynamic> j) => Quote(
         id: j['id'] as String,
@@ -56,9 +77,15 @@ enum Cover { thirdParty, thirdPartyFireTheft, comprehensive;
       );
 
   Map<String, dynamic> toJson() => {'id': id, 'premium': premium, 'currency': currency};
-
-
  }
+
+double calculatePremium(QuoteRequest r) {
+  var p = 1000.0;
+  if (r.driverAge < 25) p *= 1.5;
+  if (r.year < 2015) p *= 1.2;
+  p *= r.cover.factor;
+  return (p * 100).roundToDouble() / 100;
+}
 
  sealed class QuoteState {
   const QuoteState();
@@ -91,9 +118,7 @@ String describe(QuoteState s) => switch (s) {
  
 abstract interface class QuoteService {
   Future<Quote> getQuote(QuoteRequest r);
-  
    double calculatePremium(QuoteRequest r) ;
-
 }
 
 class FakeQuoteService implements QuoteService {
@@ -103,7 +128,7 @@ class FakeQuoteService implements QuoteService {
     final base = 1000.0;
     final ageFactor = r.driverAge < 25 ? base * 1.2 : base* 1.0;
     final yearFactor = r.year < 2015 ? ageFactor * 1.5 : ageFactor * 1.0;
-    final double premium = (yearFactor * r.cover.factor(r.cover)).toDouble();
+    final double premium = (yearFactor * r.cover.factor).toDouble();
     return premium;
   }
 
