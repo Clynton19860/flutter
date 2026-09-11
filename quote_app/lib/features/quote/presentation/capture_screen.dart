@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:quote_app/core/theme/brand_provider.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
 import 'package:quote_app/features/quote/presentation/capture_form.dart';
-import 'package:quote_app/features/quote/presentation/premium_card.dart';
 import 'package:quote_app/features/quote/presentation/quote_providers.dart';
 
 class CaptureScreen extends ConsumerStatefulWidget {
@@ -22,9 +22,14 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
     final state = ref.watch(quoteProvider);
 
     ref.listen(quoteProvider, (prev, next) {
-      if (next is QuoteFailed) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(next.message)));
+      switch (next) {
+        case QuoteLoaded(:final quote):
+          context.push('/quote/result/${quote.id}');
+        case QuoteFailed(:final message):
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(message)));
+        default:
+          break;
       }
     });
 
@@ -54,7 +59,7 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
                   QuoteIdle() => const Text('Fill in the form to get a quote'),
                   QuoteLoading() =>
                     const Center(child: CircularProgressIndicator()),
-                  QuoteLoaded(:final quote) => PremiumCard(quote: quote),
+                  QuoteLoaded() => const Text('Opening your quote...'),
                   QuoteFailed(:final message) => Text(
                       message,
                       style:
@@ -103,7 +108,6 @@ class _BrandHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final brand = ref.watch(brandProvider);
     final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -112,22 +116,6 @@ class _BrandHeader extends ConsumerWidget {
           decoration: BoxDecoration(
             color: cs.primary,
             borderRadius: BorderRadius.circular(16),
-          ),
-        ),
-        Positioned(
-          left: 16,
-          top: 16,
-          child: Row(
-            children: [
-              Image.asset(brand.logoAsset, height: 28, semanticLabel: '${brand.name} logo'),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  brand.name,
-                  style: tt.titleLarge?.copyWith(color: cs.onPrimaryContainer),
-                ),
-              ),
-            ],
           ),
         ),
         Positioned(
@@ -141,10 +129,12 @@ class _BrandHeader extends ConsumerWidget {
         Positioned.fill(
           child: Align(
             alignment: Alignment.center,
-            child: Icon(
-              Icons.shield,
-              size: 48,
-              color: Colors.white24,
+            child: Image.asset(
+              brand.logoAsset,
+              width: 120,
+              height: 96,
+              fit: BoxFit.contain,
+              semanticLabel: '${brand.name} logo',
             ),
           ),
         ),

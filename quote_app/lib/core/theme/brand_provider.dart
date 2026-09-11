@@ -1,13 +1,27 @@
 // lib/core/theme/brand_provider.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:quote_app/core/storage/prefs_providers.dart';
 import 'brand_theme.dart';
 
 class BrandKeyNotifier extends Notifier<String> {
-  @override
-  String build() => 'alpha';
+  static const _key = 'brandKey';
 
-  void set(String key) => state = key;
-  void toggle() => state = state == 'alpha' ? 'beta' : 'alpha';
+  @override
+  String build() => ref.watch(sharedPrefsProvider).getString(_key) ?? 'alpha';
+
+  Future<void> set(String key) async {
+    await ref.read(sharedPrefsProvider).setString(_key, key);
+    state = key;
+  }
+
+  void toggle() => set(
+        switch (state) {
+          'alpha' => 'beta',
+          'beta' => 'gamma',
+          'gamma' => 'alpha',
+          _ => 'alpha',
+        },
+      );
 }
 
 final brandKeyProvider =
@@ -18,3 +32,4 @@ final brandProvider = Provider<BrandTheme>((ref) {
   final key = ref.watch(brandKeyProvider);
   return brands[key] ?? brands['alpha']!;
 });
+

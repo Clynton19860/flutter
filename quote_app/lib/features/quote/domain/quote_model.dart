@@ -1,5 +1,9 @@
 import 'dart:async';
 
+import 'package:json_annotation/json_annotation.dart';
+
+part 'quote_model.g.dart';
+
 enum Cover {
   thirdParty, thirdPartyFireTheft, comprehensive;
 
@@ -16,6 +20,7 @@ enum Cover {
       };
 }
 
+@JsonSerializable()
 class QuoteRequest {
   final String make;
   final String? model;
@@ -40,6 +45,9 @@ class QuoteRequest {
         cover: cover ?? this.cover,
       );
 
+  factory QuoteRequest.fromJson(Map<String, dynamic> json) => _$QuoteRequestFromJson(json);
+  Map<String, dynamic> toJson() => _$QuoteRequestToJson(this);
+
   @override
   bool operator ==(Object other) =>
       other is QuoteRequest &&
@@ -57,22 +65,21 @@ extension Money on double {
   String get rands => 'R ${toStringAsFixed(2)}';
 }
 
+@JsonSerializable()
 class Quote {
   final String id;
   final double premium;
   final String currency;
 
-  const Quote({required this.id, required this.premium, this.currency = 'ZAR'});
+  @JsonKey(name: 'breakdown_lines')
+  final List<String>? breakdown;
+
+  const Quote({required this.id, required this.premium, this.currency = 'ZAR', this.breakdown});
 
   String get display => '$currency ${premium.toStringAsFixed(2)}';
 
-  factory Quote.fromJson(Map<String, dynamic> j) => Quote(
-        id: j['id'] as String,
-        premium: (j['premium'] as num).toDouble(),
-        currency: j['currency'] as String? ?? 'ZAR',
-      );
-
-  Map<String, dynamic> toJson() => {'id': id, 'premium': premium, 'currency': currency};
+  factory Quote.fromJson(Map<String, dynamic> json) => _$QuoteFromJson(json);
+  Map<String, dynamic> toJson() => _$QuoteToJson(this);
 }
 
 double calculatePremium(QuoteRequest r) {
