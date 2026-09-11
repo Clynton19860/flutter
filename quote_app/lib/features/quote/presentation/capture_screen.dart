@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:quote_app/core/theme/brand_provider.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
 import 'package:quote_app/features/quote/presentation/capture_form.dart';
@@ -21,24 +22,15 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
       child: Padding(padding: EdgeInsets.all(20), child: form),
     );
   }
-  
-  // Widget _leftHandContainer(List<Widget>? children) => Stack(
-  //   children: [
-  //     Card(
-  //       elevation: 200,
-  //       shadowColor: Colors.amber,
-  //       color: Colors.amber,
-  //     ),
-  //   if(children != null && children.isNotEmpty) for(final child in children) child
-  //   ]
-  // );
 
   @override
   Widget build(BuildContext context) { 
     final quoteState = ref.watch(quoteProvider);
 
     ref.listen<QuoteState>(quoteProvider, (previous, next) {
-      if (next is Failed) {
+      if (next is Loaded) {
+        context.push('/quote/result/${next.quote.id}');
+      } else if (next is Failed) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(next.message ?? 'Something went wrong')),
         );
@@ -69,9 +61,6 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
     body: SafeArea(child: LayoutBuilder(builder: (context, constraints){
       final isScrollingColumn = constraints.maxWidth < 700;
       const header = _BrandHeader();
-      // const rowColumChildren = [
-      //   SizedBox(width: 450, child: header)
-      // ];
 
       if(isScrollingColumn){
         return Scrollbar(
@@ -123,8 +112,8 @@ class _BrandHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentOrietation = MediaQuery.orientationOf(context);
-    final isLandscape = currentOrietation == Orientation.landscape;
+    final currentOrientation = MediaQuery.orientationOf(context);
+    final isLandscape = currentOrientation == Orientation.landscape;
     final brand = ref.watch(brandProvider);
     final name = brand.name;
     final logoAsset = brand.logoAsset;
