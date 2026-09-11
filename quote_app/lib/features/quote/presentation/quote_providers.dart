@@ -51,3 +51,5 @@ class QuoteNotifier extends Notifier<QuoteState> {
 final quoteProvider = NotifierProvider<QuoteNotifier, QuoteState>(
   QuoteNotifier.new,
 );
+
+final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
