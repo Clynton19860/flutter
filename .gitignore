@@ -1,6 +1,8 @@
 # The app lives on the lab-* branches and in ../flutter-labs.
 # It must never be committed to a materials branch.
-quote_app/
+quote_app/*
+!quote_app/full_code/
+!quote_app/full_code/**
 
 # PowerPoint lock files
 ~$*
