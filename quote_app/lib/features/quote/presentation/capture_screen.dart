@@ -1,8 +1,11 @@
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:quote_app/core/theme/brand_provider.dart';
+import 'package:quote_app/core/theme/brand_theme.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
 import 'package:quote_app/features/quote/presentation/capture_form.dart';
 import 'package:quote_app/features/quote/presentation/quote_providers.dart';
@@ -34,134 +37,224 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
       }
     });
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(brand.name),
-        actions: [
-          // Quick brand toggle is a debug convenience; release builds only
-          // switch brand through the Settings screen's picker.
-          if (kDebugMode)
-            IconButton(
-              icon: const Icon(Icons.swap_horiz),
-              tooltip: 'Switch brand',
-              onPressed: () => ref.read(brandKeyProvider.notifier).toggle(),
-            ),
-        ],
+    final baseTheme = Theme.of(context);
+    // iOS system-font look, scoped to this screen only via a local Theme
+    // override - `.SF Pro Text` resolves to the real system font on iOS/
+    // macOS (Apple's own font-matching convention) and falls back to the
+    // platform default everywhere else. Doesn't touch BrandTheme, so
+    // Settings/Saved/Onboarding are unaffected.
+    return Theme(
+      data: baseTheme.copyWith(
+        textTheme: baseTheme.textTheme.apply(fontFamily: '.SF Pro Text'),
       ),
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final twoColumn = constraints.maxWidth >= 700;
-            const header = _BrandHeader();
-            final form = Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                CaptureForm(
-                  enabled: state is! QuoteLoading,
-                  onSubmit: (r) => ref.read(quoteProvider.notifier).submit(r),
-                ),
-                const SizedBox(height: 16),
-                switch (state) {
-                  QuoteIdle() => const Text('Fill in the form to get a quote'),
-                  QuoteLoading() => const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                  QuoteLoaded() => const Text('Opening your quote...'),
-                  QuoteFailed(:final message) => Text(
-                    message,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                  ),
-                },
-              ],
-            );
-
-            if (twoColumn) {
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          title: Text(brand.name),
+          centerTitle: true,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          // Frosted, translucent nav bar - the iOS convention - rather than
+          // an opaque Material app bar.
+          flexibleSpace: ClipRect(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+              child: Container(color: Colors.transparent),
+            ),
+          ),
+          actions: [
+            // Quick brand toggle is a debug convenience; release builds only
+            // switch brand through the Settings screen's picker.
+            if (kDebugMode)
+              IconButton(
+                icon: const Icon(Icons.swap_horiz),
+                tooltip: 'Switch brand',
+                onPressed: () => ref.read(brandKeyProvider.notifier).toggle(),
+              ),
+          ],
+        ),
+        body: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final twoColumn = constraints.maxWidth >= 700;
+              final header = _GlassHero(brand: brand);
+              final form = Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const SizedBox(
-                    width: 280,
-                    child: Padding(padding: EdgeInsets.all(16), child: header),
+                  CaptureForm(
+                    enabled: state is! QuoteLoading,
+                    onSubmit: (r) => ref.read(quoteProvider.notifier).submit(r),
                   ),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(16),
-                      child: form,
+                  const SizedBox(height: 16),
+                  switch (state) {
+                    QuoteIdle() => const Text(
+                      'Fill in the form to get a quote',
                     ),
-                  ),
+                    QuoteLoading() => const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                    QuoteLoaded() => const Text('Opening your quote...'),
+                    QuoteFailed(:final message) => Text(
+                      message,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                    QuoteExpired() => Text(
+                      'Your quote has expired - get a new one',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                  },
                 ],
               );
-            }
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [header, const SizedBox(height: 24), form],
-              ),
-            );
-          },
+
+              if (twoColumn) {
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: 280,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: header,
+                      ),
+                    ),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(16),
+                        child: form,
+                      ),
+                    ),
+                  ],
+                );
+              }
+              return SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [header, const SizedBox(height: 24), form],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
   }
 }
 
-class _BrandHeader extends ConsumerWidget {
-  const _BrandHeader();
+/// Glassmorphism hero: gradient card, soft translucent "blobs" for depth,
+/// and a frosted pill for the selected cover - all colour driven by the
+/// active BrandTheme, none of it hardcoded.
+class _GlassHero extends StatelessWidget {
+  const _GlassHero({required this.brand});
+  final BrandTheme brand;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final brand = ref.watch(brandProvider);
+  Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Container(
-          height: 160,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(28),
+      child: SizedBox(
+        height: 180,
+        child: DecoratedBox(
           decoration: BoxDecoration(
-            color: cs.primaryContainer,
-            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [cs.primary, cs.primaryContainer],
+            ),
           ),
-        ),
-        Positioned(
-          left: 16,
-          top: 16,
-          right: 16,
-          child: Row(
+          child: Stack(
+            clipBehavior: Clip.none,
             children: [
-              Image.asset(
-                brand.logoAsset,
-                height: 28,
-                semanticLabel: '${brand.name} logo',
+              Positioned(
+                top: -30,
+                right: -30,
+                child: _GlassBlob(size: 140, color: cs.onPrimary),
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  brand.name,
-                  style: tt.titleLarge?.copyWith(color: cs.onPrimaryContainer),
+              const Positioned(
+                bottom: -50,
+                left: -30,
+                child: _GlassBlob(size: 170, color: Colors.white),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Image.asset(
+                      brand.logoAsset,
+                      height: 32,
+                      semanticLabel: '${brand.name} logo',
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        brand.name,
+                        style: tt.titleLarge?.copyWith(
+                          color: cs.onPrimary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
+              const Positioned(left: 20, bottom: 20, child: _GlassPill()),
             ],
           ),
         ),
-        Positioned(
-          right: 16,
-          bottom: -20,
-          child: Chip(
-            label: const Text('Comprehensive'),
-            backgroundColor: cs.surface,
+      ),
+    );
+  }
+}
+
+// A soft translucent circle behind the glass - decorative texture only, so
+// like the old watermark icon, white is the sanctioned exception here
+// rather than a brand colour.
+class _GlassBlob extends StatelessWidget {
+  const _GlassBlob({required this.size, required this.color});
+  final double size;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: size,
+    height: size,
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      color: color.withValues(alpha: 0.12),
+    ),
+  );
+}
+
+class _GlassPill extends StatelessWidget {
+  const _GlassPill();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.22),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
+          ),
+          child: Text(
+            'Comprehensive',
+            style: TextStyle(color: cs.onPrimary, fontWeight: FontWeight.w600),
           ),
         ),
-        const Positioned.fill(
-          child: Align(
-            alignment: Alignment.center,
-            child: Icon(Icons.shield, size: 48, color: Colors.white24),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

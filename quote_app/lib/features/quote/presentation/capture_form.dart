@@ -3,6 +3,45 @@ import 'package:flutter/services.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
 import 'package:quote_app/features/quote/presentation/cover_picker.dart';
 
+// iOS-style field decoration: filled, borderless, rounded - kept local to
+// this file rather than in BrandTheme, so it doesn't bleed into Settings,
+// Saved or Onboarding.
+InputDecoration _glassDecoration(
+  BuildContext context, {
+  required String label,
+  String? hint,
+  String? errorText,
+  Widget? suffixIcon,
+}) {
+  final cs = Theme.of(context).colorScheme;
+  const radius = BorderRadius.all(Radius.circular(14));
+  return InputDecoration(
+    labelText: label,
+    hintText: hint,
+    errorText: errorText,
+    suffixIcon: suffixIcon,
+    filled: true,
+    fillColor: cs.surfaceContainerHigh.withValues(alpha: 0.6),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    border: const OutlineInputBorder(
+      borderRadius: radius,
+      borderSide: BorderSide.none,
+    ),
+    enabledBorder: const OutlineInputBorder(
+      borderRadius: radius,
+      borderSide: BorderSide.none,
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: radius,
+      borderSide: BorderSide(color: cs.primary, width: 1.5),
+    ),
+    errorBorder: OutlineInputBorder(
+      borderRadius: radius,
+      borderSide: BorderSide(color: cs.error, width: 1.5),
+    ),
+  );
+}
+
 class CaptureForm extends StatefulWidget {
   const CaptureForm({super.key, required this.onSubmit, this.enabled = true});
   final void Function(QuoteRequest) onSubmit;
@@ -89,61 +128,83 @@ class _CaptureFormState extends State<CaptureForm> {
     child: _fields(context),
   );
 
-  Widget _fields(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      CoverPicker(value: _cover, onChanged: (c) => setState(() => _cover = c)),
-      const SizedBox(height: 12),
-      TextFormField(
-        controller: _makeCtrl,
-        decoration: const InputDecoration(
-          labelText: 'Vehicle make',
-          hintText: 'e.g. VW',
+  Widget _fields(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        CoverPicker(
+          value: _cover,
+          onChanged: (c) => setState(() => _cover = c),
         ),
-        textInputAction: TextInputAction.next,
-        textCapitalization: TextCapitalization.words,
-        validator: (v) =>
-            (v == null || v.trim().isEmpty) ? 'Make is required' : null,
-      ),
-      const SizedBox(height: 12),
-      TextFormField(
-        controller: _yearCtrl,
-        decoration: const InputDecoration(labelText: 'Year'),
-        keyboardType: TextInputType.number,
-        inputFormatters: [
-          FilteringTextInputFormatter.digitsOnly,
-          LengthLimitingTextInputFormatter(4),
-        ],
-        validator: (v) {
-          final y = int.tryParse(v ?? '');
-          if (y == null) return 'Enter a 4-digit year';
-          if (y < 1990 || y > DateTime.now().year) {
-            return 'Year must be 1990-${DateTime.now().year}';
-          }
-          return null;
-        },
-      ),
-      const SizedBox(height: 12),
-      _LicenceDateField(
-        value: _licenceDate,
-        onChanged: (d) => setState(() => _licenceDate = d),
-      ),
-      const SizedBox(height: 24),
-      FilledButton.icon(
-        onPressed: widget.enabled ? _submit : null,
-        icon: widget.enabled
-            ? const Icon(Icons.calculate)
-            : const SizedBox(
-                width: 18,
-                height: 18,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-        label: Text(widget.enabled ? 'Get quote' : 'Calculating...'),
-      ),
-      const SizedBox(height: 12),
-      OutlinedButton(onPressed: _reset, child: const Text('Reset')),
-    ],
-  );
+        const SizedBox(height: 12),
+        TextFormField(
+          controller: _makeCtrl,
+          decoration: _glassDecoration(
+            context,
+            label: 'Vehicle make',
+            hint: 'e.g. VW',
+          ),
+          textInputAction: TextInputAction.next,
+          textCapitalization: TextCapitalization.words,
+          validator: (v) =>
+              (v == null || v.trim().isEmpty) ? 'Make is required' : null,
+        ),
+        const SizedBox(height: 12),
+        TextFormField(
+          controller: _yearCtrl,
+          decoration: _glassDecoration(context, label: 'Year'),
+          keyboardType: TextInputType.number,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            LengthLimitingTextInputFormatter(4),
+          ],
+          validator: (v) {
+            final y = int.tryParse(v ?? '');
+            if (y == null) return 'Enter a 4-digit year';
+            if (y < 1990 || y > DateTime.now().year) {
+              return 'Year must be 1990-${DateTime.now().year}';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 12),
+        _LicenceDateField(
+          value: _licenceDate,
+          onChanged: (d) => setState(() => _licenceDate = d),
+        ),
+        const SizedBox(height: 24),
+        FilledButton.icon(
+          onPressed: widget.enabled ? _submit : null,
+          style: FilledButton.styleFrom(
+            backgroundColor: cs.primary,
+            foregroundColor: cs.onPrimary,
+            minimumSize: const Size.fromHeight(52),
+            shape: const StadiumBorder(),
+            elevation: 0,
+          ),
+          icon: widget.enabled
+              ? const Icon(Icons.calculate)
+              : const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+          label: Text(widget.enabled ? 'Get quote' : 'Calculating...'),
+        ),
+        const SizedBox(height: 12),
+        OutlinedButton(
+          onPressed: _reset,
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size.fromHeight(52),
+            shape: const StadiumBorder(),
+            side: BorderSide(color: cs.outlineVariant),
+          ),
+          child: const Text('Reset'),
+        ),
+      ],
+    );
+  }
 }
 
 class _LicenceDateField extends StatelessWidget {
@@ -160,8 +221,9 @@ class _LicenceDateField extends StatelessWidget {
       initialValue: value,
       validator: (d) => d == null ? 'Licence date is required' : null,
       builder: (state) => InputDecorator(
-        decoration: InputDecoration(
-          labelText: 'Licence issue date',
+        decoration: _glassDecoration(
+          context,
+          label: 'Licence issue date',
           errorText: state.errorText,
           suffixIcon: const Icon(Icons.calendar_today),
         ),

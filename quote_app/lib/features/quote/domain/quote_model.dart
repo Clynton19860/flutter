@@ -16,7 +16,7 @@ enum Cover {
 
   String get label => switch (this) {
     Cover.thirdParty => 'Third party',
-    Cover.thirdPartyFireTheft => 'Third party, fire & theft',
+    Cover.thirdPartyFireTheft => 'Third party & fire',
     Cover.comprehensive => 'Comprehensive',
   };
 }
@@ -129,9 +129,15 @@ class QuoteFailed extends QuoteState {
   final String message;
 }
 
+class QuoteExpired extends QuoteState {
+  const QuoteExpired(this.quote);
+  final Quote quote;
+}
+
 String describe(QuoteState s) => switch (s) {
   QuoteIdle() => 'Fill in the form',
   QuoteLoading() => 'Calculating…',
   QuoteLoaded(:final quote) => 'Premium ${quote.display}',
   QuoteFailed(:final message) => 'Error: $message',
+  QuoteExpired() => 'Quote expired',
 };

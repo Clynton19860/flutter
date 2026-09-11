@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
 
@@ -70,32 +72,52 @@ class _CoverCard extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        Material(
-          color: cs.surface,
-          borderRadius: BorderRadius.circular(12),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(12),
-            onTap: onTap,
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: selected ? cs.primary : cs.outlineVariant,
-                  width: selected ? 2 : 1,
-                ),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(cover.icon, color: cs.primary, size: 28),
-                  const SizedBox(height: 12),
-                  Text(
-                    cover.label,
-                    textAlign: TextAlign.center,
-                    style: tt.labelSmall,
+        ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(20),
+                onTap: onTap,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 20,
+                    horizontal: 8,
                   ),
-                ],
+                  decoration: BoxDecoration(
+                    color: cs.surface.withValues(alpha: selected ? 0.9 : 0.55),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: selected
+                          ? cs.primary
+                          : cs.outlineVariant.withValues(alpha: 0.5),
+                      width: selected ? 2 : 1,
+                    ),
+                    boxShadow: selected
+                        ? [
+                            BoxShadow(
+                              color: cs.primary.withValues(alpha: 0.25),
+                              blurRadius: 16,
+                              offset: const Offset(0, 6),
+                            ),
+                          ]
+                        : null,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(cover.icon, color: cs.primary, size: 28),
+                      const SizedBox(height: 12),
+                      Text(
+                        cover.label,
+                        textAlign: TextAlign.center,
+                        style: tt.labelSmall,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -108,7 +130,7 @@ class _CoverCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: cs.tertiaryContainer,
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: cs.primary),
               ),
               child: Text(
