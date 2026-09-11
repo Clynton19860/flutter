@@ -105,12 +105,11 @@ double calculatePremium(QuoteRequest r) {
 // TODO: sealed class QuoteState with Idle / Loading / Loaded(quote) / Failed(message)
 //       String describe(QuoteState s) using an exhaustive switch expression
 
-String describe(QuoteState s) => switch (s.runtimeType) {
-  Idle => 'Fill in the form',
-  Loading => 'Calculating...',
-  Loaded => (s as Loaded).quote.display,
-  Failed => 'Error: ${(s as Failed).message}',
-  _ => '???????? UNKNOWN STATE ????????',
+String describe(QuoteState state) => switch (state) {
+  Idle() => 'Fill in the form',
+  Loading() => 'Calculating...',
+  Loaded(:final quote) => quote.display,
+  Failed(:final message) => 'Error: $message',
 };
 
 sealed class QuoteState {}
@@ -132,6 +131,7 @@ class Failed implements QuoteState {
 
   Failed({this.message = 'Something went wrong'});
 }
+//TODO: Add QuoteExpired State
 
 /*abstract interface class QuoteService {
   Future<Quote> getQuote(QuoteRequest r);

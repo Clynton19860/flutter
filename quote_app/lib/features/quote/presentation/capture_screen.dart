@@ -88,7 +88,7 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
-                    SizedBox(width: 400, child: header)
+                    SizedBox(width: 400, height: 150, child: header)
                   ],
                 ),
               ),
@@ -141,7 +141,7 @@ class _BrandHeader extends ConsumerWidget {
           ),
         ),
         Positioned(
-          right: 16, top: isLandscape ? 170: null, bottom: isLandscape? null : -20,
+          right: 16, top: isLandscape ? 120: null, bottom: isLandscape? null : -20,
           child: Chip(label: const Text('Comprehensive'), backgroundColor: cs.surface),
         ),
         Positioned.fill(
