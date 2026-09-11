@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:quote_app/core/network/dio_client.dart';
 import 'package:quote_app/features/quote/data/dio_quote_service.dart';
@@ -12,38 +10,40 @@ final quoteServiceProvider = Provider<QuoteService>(
   (ref) => DioQuoteService(ref.watch(dioProvider)),
 );
 
-class QuoteNotifier extends Notifier<QuoteState> {
-  // A quote left un-actioned this long auto-expires. A real Timer, so tests
-  // can drive it with fake_async's FakeAsync instead of waiting for real time.
-  static const expiryDuration = Duration(minutes: 5);
+// Overridable in tests, so expiry can be checked by advancing a fake clock
+// instead of waiting on real time.
+final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
 
-  Timer? _expiryTimer;
+class QuoteNotifier extends Notifier<QuoteState> {
+  static const defaultMaxAge = Duration(minutes: 15);
+
+  DateTime? _loadedAt;
 
   @override
-  QuoteState build() {
-    ref.onDispose(() => _expiryTimer?.cancel());
-    return const QuoteIdle();
-  }
+  QuoteState build() => const QuoteIdle();
 
   Future<void> submit(QuoteRequest request) async {
-    _expiryTimer?.cancel();
     state = const QuoteLoading();
     try {
       final quote = await ref.read(quoteServiceProvider).getQuote(request);
+      _loadedAt = ref.read(clockProvider)();
       state = QuoteLoaded(quote);
-      _expiryTimer = Timer(expiryDuration, () {
-        if (state case QuoteLoaded(quote: final loaded)
-            when loaded.id == quote.id) {
-          state = QuoteExpired(quote);
-        }
-      });
     } catch (e) {
       state = QuoteFailed(e.toString().replaceFirst('Exception: ', ''));
     }
   }
 
+  void checkExpiry({Duration maxAge = defaultMaxAge}) {
+    final current = state;
+    if (current is! QuoteLoaded || _loadedAt == null) return;
+    final now = ref.read(clockProvider)();
+    if (now.difference(_loadedAt!) > maxAge) {
+      state = QuoteExpired(current.quote);
+    }
+  }
+
   void reset() {
-    _expiryTimer?.cancel();
+    _loadedAt = null;
     state = const QuoteIdle();
   }
 }
@@ -51,5 +51,3 @@ class QuoteNotifier extends Notifier<QuoteState> {
 final quoteProvider = NotifierProvider<QuoteNotifier, QuoteState>(
   QuoteNotifier.new,
 );
-
-final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
