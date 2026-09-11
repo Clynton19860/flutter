@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -37,11 +38,14 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
       appBar: AppBar(
         title: Text(brand.name),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.swap_horiz),
-            tooltip: 'Switch brand',
-            onPressed: () => ref.read(brandKeyProvider.notifier).toggle(),
-          ),
+          // Quick brand toggle is a debug convenience; release builds only
+          // switch brand through the Settings screen's picker.
+          if (kDebugMode)
+            IconButton(
+              icon: const Icon(Icons.swap_horiz),
+              tooltip: 'Switch brand',
+              onPressed: () => ref.read(brandKeyProvider.notifier).toggle(),
+            ),
         ],
       ),
       body: SafeArea(
@@ -77,12 +81,9 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     width: 280,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: header,
-                    ),
+                    child: Padding(padding: EdgeInsets.all(16), child: header),
                   ),
                   Expanded(
                     child: SingleChildScrollView(
@@ -154,7 +155,7 @@ class _BrandHeader extends ConsumerWidget {
             backgroundColor: cs.surface,
           ),
         ),
-        Positioned.fill(
+        const Positioned.fill(
           child: Align(
             alignment: Alignment.center,
             child: Icon(Icons.shield, size: 48, color: Colors.white24),

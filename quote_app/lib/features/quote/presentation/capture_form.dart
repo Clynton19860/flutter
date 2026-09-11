@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
+import 'package:quote_app/features/quote/presentation/cover_picker.dart';
 
 class CaptureForm extends StatefulWidget {
   const CaptureForm({super.key, required this.onSubmit, this.enabled = true});
@@ -121,19 +122,7 @@ class _CaptureFormState extends State<CaptureForm> {
         },
       ),
       const SizedBox(height: 12),
-      DropdownButtonFormField<Cover>(
-        initialValue: _cover,
-        isExpanded: true,
-        decoration: const InputDecoration(labelText: 'Cover'),
-        items: [
-          for (final c in Cover.values)
-            DropdownMenuItem(
-              value: c,
-              child: Text(c.label, overflow: TextOverflow.ellipsis),
-            ),
-        ],
-        onChanged: (c) => setState(() => _cover = c ?? _cover),
-      ),
+      CoverPicker(value: _cover, onChanged: (c) => setState(() => _cover = c)),
       const SizedBox(height: 12),
       _LicenceDateField(
         value: _licenceDate,
