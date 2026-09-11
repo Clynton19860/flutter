@@ -58,15 +58,9 @@ class _CaptureFormState extends State<CaptureForm> {
               child: const Text('Cancel'),
             ),
             FilledButton.icon(
-              onPressed: widget.enabled ? _submit : null,
-              icon: widget.enabled
-                  ? const Icon(Icons.calculate)
-                  : const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-              label: Text(widget.enabled ? 'Get quote' : 'Calculating...'),
+              onPressed: () => Navigator.pop(ctx, true),
+              icon: const Icon(Icons.delete_outline),
+              label: const Text('Discard'),
             ),
           ],
         ),
@@ -142,13 +136,26 @@ class _CaptureFormState extends State<CaptureForm> {
         onChanged: (d) => setState(() => _licenceDate = d),
       ),
       const SizedBox(height: 24),
+
       FilledButton.icon(
-        onPressed: _submit,
-        icon: const Icon(Icons.calculate),
-        label: const Text('Get quote'),
+        onPressed: widget.enabled ? _submit : null,
+        icon: widget.enabled
+            ? const Icon(Icons.calculate)
+            : const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+        label: Text(widget.enabled ? 'Get quote' : 'Calculating...'),
       ),
+
       const SizedBox(height: 12),
-      OutlinedButton(onPressed: _reset, child: const Text('Reset')),
+
+      OutlinedButton.icon(
+        onPressed: _reset,
+        icon: const Icon(Icons.refresh),
+        label: const Text('Start Over'),
+      ),
     ],
   );
 }

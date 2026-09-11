@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:quote_app/features/quote/domain/quote_model.dart';
 
 class PremiumCard extends StatelessWidget {
-  const PremiumCard({
-    super.key,
-    required this.quote,
-  });
+  const PremiumCard({super.key, required this.quote});
 
   final Quote quote;
 
@@ -23,14 +20,12 @@ class PremiumCard extends StatelessWidget {
           children: [
             Text(
               'Your monthly premium',
-              style: tt.labelLarge?.copyWith(
-                color: cs.onPrimaryContainer,
-              ),
+              style: tt.labelLarge?.copyWith(color: cs.onPrimaryContainer),
             ),
             const SizedBox(height: 8),
             Text(
               quote.display,
-              style: tt.displaySmall?.copyWith(
+              style: tt.headlineMedium?.copyWith(
                 color: cs.onPrimaryContainer,
                 fontWeight: FontWeight.bold,
               ),
@@ -38,9 +33,7 @@ class PremiumCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               'Quote ref ${quote.id}',
-              style: tt.bodySmall?.copyWith(
-                color: cs.onPrimaryContainer,
-              ),
+              style: tt.bodySmall?.copyWith(color: cs.onPrimaryContainer),
             ),
           ],
         ),

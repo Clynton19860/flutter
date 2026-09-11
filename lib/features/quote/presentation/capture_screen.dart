@@ -4,8 +4,9 @@ import 'package:quote_app/features/quote/domain/quote_model.dart';
 import 'package:quote_app/features/quote/presentation/capture_form.dart';
 import 'package:quote_app/core/theme/brand_theme.dart';
 import 'package:quote_app/core/theme/brand_provider.dart';
-import 'package:quote_app/features/quote/presentation/premium_card.dart';
+// import 'package:quote_app/features/quote/presentation/premium_card.dart';
 import 'package:quote_app/features/quote/presentation/quote_providers.dart';
+import 'package:go_router/go_router.dart';
 
 class CaptureScreen extends ConsumerStatefulWidget {
   const CaptureScreen({super.key});
@@ -26,9 +27,16 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
     final quoteState = ref.watch(quoteProvider);
 
     ref.listen<QuoteState>(quoteProvider, (previous, next) {
-      if (next is Failed) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(next.message)));
+      switch (next) {
+        case Loaded(:final quote):
+          context.push('/quote/result/${quote.id}');
+
+        case Failed(:final message):
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(message)));
+
+        default:
+          break;
       }
     });
     const header = _BrandHeader();
@@ -79,7 +87,7 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
                         child: CircularProgressIndicator(),
                       ),
 
-                      Loaded(:final quote) => PremiumCard(quote: quote),
+                      Loaded() => const Text('Opening your quote...'),
 
                       Failed(:final message) => Text(message),
                     },
@@ -108,7 +116,7 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
 
                   Loading() => const Center(child: CircularProgressIndicator()),
 
-                  Loaded(:final quote) => PremiumCard(quote: quote),
+                  Loaded() => const Text('Opening your quote...'),
 
                   Failed(:final message) => Text(message),
                 },
