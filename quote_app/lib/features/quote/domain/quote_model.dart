@@ -125,3 +125,8 @@ class QuoteFailed extends QuoteState {
   const QuoteFailed(this.message);
   final String message;
 }
+
+class QuoteExpired extends QuoteState {
+  const QuoteExpired(this.quote);
+  final Quote quote;
+}

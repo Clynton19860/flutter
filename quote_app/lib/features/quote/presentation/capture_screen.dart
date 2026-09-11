@@ -67,6 +67,11 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
                         style: TextStyle(
                             color: Theme.of(context).colorScheme.error),
                       ),
+                      QuoteExpired(:final quote) => Text(
+                        'Your quote ${quote.id} has expired',
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.error),
+                      ),
                   },
                 ],
               ),
